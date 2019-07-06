@@ -1,0 +1,157 @@
+# Sample Demo Magazine TOML file
+
+title = 'Ant Colony Optimization Search Demo (Traveling Salesman)'
+demo = 'dm/ant-colony-search'
+
+# Configuration for running the demo:
+#
+# 1. For the first time
+# 2. After the first time
+#   a. Understaning the demo parameters
+#   b. Finding and using different data sets
+#
+[run]
+
+  ############################################################################
+  #
+  # (Running it for the first time)
+  #
+  # Preconfigured runs:
+  # run.0 (default), run.1 ... run.N
+  #
+  ############################################################################
+
+  [run.0]
+  doc = """
+        Find the shortest roundtrip through Djibouti (38 cities) \
+        using an artificial ant colony and the MAX-MIN method
+        """
+  exec = '/home/bin/acotsp',
+  args = [
+    '--mmas',
+    '-i /home/data/cities/djibouti-38/dj38.tsp',
+    '--tries 1',
+    '--time 5',
+  ]
+  arg_docs = [
+    "Use the MAX-MIN method",
+    "The geographic coordinates of all 38 cities in the country of Djibouti.",
+    "Run 1 trial",
+    "Each trial lasts 5 seconds",
+  ]
+
+  # Another pre-configured run
+  [run.1]
+  doc = """
+        Find the shortest roundtrip through Qatar (194 cities) \
+        using an artificial ant colony and the MAX-MIN method
+        """
+  exec = '/home/bin/acotsp',
+  args = [
+    '--mmas',
+    '-i /home/data/cities/qatar-194/qa194.tsp',
+    '--tries 1',
+    '--time 5',
+  ]
+  arg_docs = [
+    "Use the MAX-MIN method",
+    "The geographic coordinates of all 194 cities in the country of Qatar.",
+    "Run 1 trial",
+    "Each trial lasts 5 seconds",
+  ]
+
+  # Another pre-configured run
+  [run.2]
+  doc = """
+        Find the shortest roundtrip through Luxembourg (980 cities) \
+        using an artificial ant colony and the MAX-MIN method
+        """
+  exec = '/home/bin/acotsp',
+  args = [
+    '--mmas',
+    '-i /home/data/cities/luxembourg-980/lu980.tsp',
+    '--tries 10',
+    '--time 5',
+  ]
+  arg_docs = [
+    "Use the MAX-MIN method",
+    "The geographic coordinates of all 980 cities in the country of Luxembourg.",
+    "Run 10 trials",
+    "Each trial lasts 5 seconds",
+  ]
+
+  ############################################################################
+  #
+  # (The demo parameters)
+  #
+  # Input files:
+  # input.0, input.1 ... input.N
+  #
+  # Output files:
+  # output.0, output.1 ... output.N
+  #
+  # Method (i.e. version of algorithm):
+  # method.0, method.1 ... method.N
+  #
+  # Parameters:
+  # param.0, param.1 ... param.N
+  #
+  ############################################################################
+  
+  [run.input.0]
+  file = "DATASET.tsp"
+  options = ["-i", "--tsplibfile"]
+  example = "/home/data/cities/djibouti-38/dj38.tsp"
+  doc = """
+        A TSPLIB formatted file containing a graph, where edge weights \
+        represent distances between data points (e.g. cities)
+        """
+
+  # Outputs
+  [run.output.0]
+  file = "best.DATASET"
+  options = []
+  example = "/home/data/examples/best.dj38"
+  doc = """
+        Statistics about the best (shortest) solutions found during each
+        trial run
+        """
+        
+  [run.output.1]
+  file = "cmp.DATASET"
+  options = []
+  example = "/home/data/examples/cmp.dj38"
+  doc = """
+        Statistics about all trial runs
+        """
+        
+  [run.output.2]
+  file = "stat.DATASET"
+  example = "/home/data/examples/stat.dj38"
+  doc = """
+        Raw unlabeled statistics from InOut.c:population_statistics()
+        """
+
+  outputs = [
+    "cmp: Statistics about each trial",
+    "best: Statistics about the best (shortest) solution found during each trial",
+    "stat: Raw statistics printed by InOut.c:population_statistics()",
+  ]
+
+  ############################################################################
+  #
+  # (Test data)
+  #
+  # Input files:
+  # input.0, input.1 ... input.N
+  #
+  # Output files:
+  # output.0, output.1 ... output.N
+  #
+  # Method (i.e. version of algorithm):
+  # method.0, method.1 ... method.N
+  #
+  # Parameters:
+  # param.0, param.1 ... param.N
+  #
+  ############################################################################

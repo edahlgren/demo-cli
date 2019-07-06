@@ -1,6 +1,34 @@
 #!/usr/bin/env node
 
 /////////////////////////////////////////////////////////////////
+// How it works
+// ------------
+//
+// Check if in a demo:
+//
+//   Does /setup exist?
+//   Does /setup.sh exist?
+//   Does metadata file exist (e.g. Demofile)
+//
+// Where should the metadata file exist?
+//
+//   /setup/Demofile
+//
+// What should be in the /setup directory?
+//
+//   /setup/setup.sh
+//   /setup/Demofile
+//
+//   ... everything else gets moved out of the directory
+//   ... to keep it clean as a setup step.
+//
+// What format should the Demofile have?
+//
+//   TOML sounds nice. Let's try it out.
+//
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////
 // Dependencies
 /////////////////////////////////////////////////////////////////
 

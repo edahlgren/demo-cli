@@ -1,0 +1,257 @@
+# Sample Demo Magazine TOML file
+
+id = 'dm/national-tsp'
+doc = 'National Traveling Salesman Problem Datasets'
+
+[source]
+org = "University of Waterloo"
+url = "http://www.math.uwaterloo.ca/tsp/world/countries.html"
+
+[metadata]
+cities = "Number of cities in the dataset"
+optimal_tour = "Length of an optimal or near-optimal (within <= 0.1%) tour"
+
+# Data sets
+[data]
+
+  [data.westsahara]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/wi29.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/witour.gif",
+  ]
+  doc = "Western Sahara"
+  cities = 29
+  optimal_tour = 27603
+
+  [data.djibouti]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/dj38.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/djtour.gif",
+  ]
+  doc = "Djibouti"
+  cities = 38
+  optimal_tour = 6656
+
+  [data.qatar]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/qa194.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/qatour.gif",
+  ]
+  doc = "Qatar"
+  cities = 194
+  optimal_tour = 9352
+
+  [data.uruguay]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/uy734.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/uytour.gif",
+  ]
+  doc = "Uruguay"
+  cities = 734
+  optimal_tour = 79114
+  
+  [data.zimbabwe]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/zi929.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/zitour.gif",
+  ]
+  doc = "Zimbabwe"
+  cities = 929
+  optimal_tour = 95345
+  
+  [data.luxembourg]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/lu980.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/lutour.gif",
+  ]
+  doc = "Luxembourg"
+  cities = 980
+  optimal_tour = 11340
+  
+  [data.rwanda]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/rw1621.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/rwtour.gif",
+  ]
+  doc = "Rwanda"
+  cities = 1621
+  optimal_tour = 26051
+  
+  [data.oman]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/mu1979.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/mutour.gif",
+  ]
+  doc = "Oman"
+  cities = 1979
+  optimal_tour = 86891
+  
+  [data.nicaragua]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/nu3496.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/nutour.gif",
+  ]
+  doc = "Nicaragua"
+  cities = 3496
+  optimal_tour = 96132
+  
+  [data.canada]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/ca4663.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/catour.gif",
+  ]
+  doc = "Canada"
+  cities = 4663
+  optimal_tour = 1290319
+
+  [data.tanzania]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/tz6117.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/tztour.gif",
+  ]
+  doc = "Tanzania"
+  cities = 6617
+  optimal_tour = 394718
+  
+  [data.egypt]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/eg7146.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/egtour.gif",
+  ]
+  doc = "Egypt"
+  cities = 7146
+  optimal_tour = 172387
+
+  [data.yemen]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/ym7663.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/ymtour.gif",
+  ]
+  doc = "Yemen"
+  cities = 7663
+  optimal_tour = 238314
+  
+  [data.panama]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/pm8079.tsp",
+  ]
+  doc = "Panama"
+  cities = 8079
+  optimal_tour = "unknown"
+  
+  [data.ireland]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/ei8246.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/eitour.gif",
+  ]
+  doc = "Ireland"
+  cities = 8246
+  optimal_tour = 206171
+
+  [data.argentina]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/ar9152.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/artour.gif",
+  ]
+  doc = "Argentina"
+  cities = 9152
+  optimal_tour = 837479
+
+  [data.japan]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/ja9847.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/jatour.gif",
+  ]
+  doc = "Japan"
+  cities = 9847
+  optimal_tour = 491924
+  
+  [data.greece]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/gr9882.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/grtour.gif",
+  ]
+  doc = "Greece"
+  cities = 9882
+  optimal_tour = 300899
+
+  [data.kazakhstan]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/kz9976.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/kztour.gif",
+  ]
+  doc = "Kazakhstan"
+  cities = 9976
+  optimal_tour = 1061882
+  
+  [data.finland]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/fi10639.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/fitour.gif",
+  ]
+  doc = "Finland"
+  cities = 10639
+  optimal_tour = 520527
+  
+  [data.morocco]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/mo14185.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/motour.gif",
+  ]
+  doc = "Morocco"
+  cities = 14185
+  optimal_tour = 427377
+  
+  [data.honduras]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/ho14473.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/hotour.gif",
+  ]
+  doc = "Honduras"
+  cities = 14473
+  optimal_tour = 177105
+
+  [data.italy]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/it16862.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/ittour.gif",
+  ]
+  doc = "Italy"
+  cities = 16862
+  optimal_tour = 557315
+  
+  [data.vietnam]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/vm22775.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/vmtour.gif",
+  ]
+  doc = "Vietnam"
+  cities = 22775
+  optimal_tour = 569288
+  
+  [data.sweden]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/sw24978.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/swtour.gif",
+  ]
+  doc = "Sweden"
+  cities = 24978
+  optimal_tour = 855597
+  
+  [data.burma]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/bm33708.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/bmtour.gif",
+  ]
+  doc = "Burma"
+  cities = 33708
+  optimal_tour = 959304
+
+  [data.china]
+  urls = [
+    "http://www.math.uwaterloo.ca/tsp/world/ch71009.tsp",
+    "http://www.math.uwaterloo.ca/tsp/world/chtour.gif",
+  ]
+  doc = "China"
+  cities = 71009
+  optimal_tour = 4566563
