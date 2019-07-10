@@ -6,8 +6,9 @@
 /////////////////////////////////////////////////////////////////
 
 const fs = require('fs');
+const path = require('path');
 const cli = require('command-line-args');
-const findport = require('get-port');
+const findPort = require('get-port');
 const stdin = require('readline-sync');
 const proc = require('child_process');
 
@@ -17,80 +18,55 @@ const proc = require('child_process');
 
 // The CLI, using a spec compatible with the command-line-args
 // package.
-const spec = [
+const cliSpec = [
     { name: 'image', defaultOption: true },
     { name: 'share' },
+    { name: 'no-share', type: Boolean },
     { name: 'port', type: Number },
-    { name: 'no-port', type: Boolean },
-    { name: 'no-share', type: Boolean }
+    { name: 'no-port', type: Boolean }
 ];
 
 // Usage examples.
-const example1 = 
-`$ demo shell dm/ant-colony-search
-demo@ant-colony-search$`;
-
-const example2 = 
-`$ demo shell --image dm/ant-colony-search
-demo@ant-colony-search$`;
-
-const example3 = 
-`$ demo shell dm/ant-colony-search --with-port=4000
-demo@ant-colony-search$`;
-
-const example4 = 
-`$ demo shell dm/ant-colony-search --no-port
-demo@ant-colony-search$`;
-
-const example5 = 
-`$ demo shell dm/ant-colony-search --with-share=/home/john/ants/shared
-demo@ant-colony-search$`;
-
-const example6 = 
-`$ demo shell dm/ant-colony-search --no-share
-demo@ant-colony-search$`;
+const example1 = "$ demo shell dm/ant-colony-search";
+const example3 = "$ demo shell dm/ant-colony-search --port=4000";
+const example5 = "$ demo shell dm/ant-colony-search --share=/home/ants/shared";
 
 // The help message content for 'demo help shell'
-const usage = {
-    formats: [
-        'demo shell <demo-image> [OPTIONS]',
-        'demo shell --image <demo-image> [OPTIONS]'
-    ],
+const usageSpec = {
+    title: 'Demo CLI - demo shell',
+    shortDescription: 'Get shell access to a demo',
     examples: [
         {
             snippet: example1,
-            desc: "Basic: get shell access to a demo"
-        },
-        {
-            snippet: example2,
-            desc: "Same as above, but more explicit"
-        },
-        {
-            snippet: example3,
-            desc: "Choose a specific port to serve demo contents"
-        },
-        {
-            snippet: example4,
-            desc: "Don't serve demo contents"
+            desc: "Get shell access to dm/ant-colony-search"
         },
         {
             snippet: example5,
-            desc: "Choose a specific directory to share demo content"
+            desc: "Share /home/ants/shared with the demo"
         },
         {
-            snippet: example6,
-            desc: "Don't share demo content with the host"
-        }
+            snippet: example3,
+            desc: "View demo files at localhost:4000"
+        },
     ],
-    desc: {
-        short: "Get shell access to a demo",
-        long: [
-            `Loads the files needed by <demo-image> into a lightweight virtual machine and gives you a shell to access and run these files.`,
-            `Inside the shell, you will see only the files needed by the demo and these files won't conflict with the files on your computer or the files of other demos.`
-        ],
-    },
+    formats: [
+        'demo shell <demo-image> [options ...]',
+        'demo shell --image <demo-image> [options ...]'
+    ],
+    options: [
+        { name: '--share', summary: "Share a specific directory with the demo."},
+        { name: '--no-share', summary: "Don't share any directory with the demo"},
+        { name: '--port', summary: "Access demo files over http at this specific port"},
+        { name: '--no-port', summary: "Don't allow access to demo files over http"}
+    ],
+    longDescription: [
+        `Loads the files needed by <demo-image> into a lightweight virtual machine and gives you a shell to access and run these files.`,
+        '',
+        `Inside the shell, you will see only the files needed by the demo and these files won't conflict with the files on your computer or the files of other demos.`
+    ],
     notes: [
         `Can't be called from inside the shell of another demo. Exit the demo before launching another shell.`,
+        '',
         `Runs in a Linux container which is not a strong security layer. For more security, launch the demo in a virtual machine and inspect the demo contents before you run and rebuild any code`
     ]
 };
@@ -113,28 +89,14 @@ const usage = {
 //   exit(code)
 //
 // Where code 0 means success and 1 means failure.
-function cmd(args, exit) {
+function exec(args, exit) {
     'use strict';
 
     // Check for required args and nonsense combinations. This
     // will call exit if the args can't be validated.
     validateArgs(args, exit);
 
-    // Parse args into a useful configuration object:
-    //
-    //  {
-    //    image:         // image name
-    //
-    //    noShare:       // --no-share is present / true
-    //    explicitShare: // --share is present
-    //    createShare:   // shared directory needs to be created
-    //    share:         // full path to shared directory
-    //
-    //    undefinedPort: // free port requested but couldn't be found
-    //    noPort:        // --no-port is present / true
-    //    explicitPort:  // --port is present
-    //    port:          // port to use
-    // }
+    // Parse args into a useful configuration object
     parseArgs(args, function(config) {
 
         // Validate the config and ask the user to confirm their
@@ -149,11 +111,13 @@ function cmd(args, exit) {
         }
 
         // Launch the demo shell.
-        console.log("... Launching demo shell ...");
         var result = launchShell(config);
 
+        // Print instructions to re-run.
+        printRerun(result);
+        
         // Exit with a failure message if launching the shell failed.
-        if (result.error || result.signal > 0) {
+        if (result.error || result.status > 0) {
             exit(1, msgFailure(result));
         }
 
@@ -220,8 +184,8 @@ function parseArgs(args, configFn) {
 
         // Parse everything into a set of configuration
         // options.
-        var cfg = makeConfig(args, shared, port);
-        return configFn(cfg);
+        var config = makeConfig(args, shared, port);
+        return configFn(config);
     });
 }
 
@@ -247,12 +211,18 @@ function getPort(args, done) {
     if (args.hasOwnProperty('no-port') &&
         args.noPort) {
         done(PORT_NONE);
+        return;
     }
     if (args.hasOwnProperty('port')) {
         done(args.port);
+        return;
     }
-    findport().then(function(port) {
-        done(port);
+    findPort().then(function(port) {
+        try {
+            done(port);
+        } catch (error) {
+            console.log('demo shell done error: ' + error);
+        }
     }).catch(function(err) {
         done(PORT_UNDEFINED);
     });
@@ -263,6 +233,7 @@ function makeConfig(args, shared, port) {
     return {
         // Image
         image: args.image,
+        name: args.image,
 
         // Shared dir
         noShare: noShare,
@@ -284,7 +255,7 @@ function validateConfig(config, exit) {
     }
 
     // Confirm the config is what the user wants.
-    printChoices(args, shared, port);
+    printChoices(config);
     if (!stdin.keyInYN("Are you sure you want these options?")) {
         // Bail out.
         console.log("\n... Not launching demo shell.");
@@ -294,96 +265,79 @@ function validateConfig(config, exit) {
     }
 }
 
-const msgSharedNone =
-`  Shared directory: none
+const msgSharedNone = `  1. No shared directory
 
-      Meaning: 
-
-      * You can only edit demo files using a command line text editor like
-        vi or emacs from within the demo shell.`;
+    * You can only edit demo files using a command line text editor like
+      vi or emacs from within the demo shell.`;
 
 function msgSharedNeedsCreate(cfg) {
     var chosenBy = cfg.explicitShare ? "you" : "us";
     
-    return `  Shared directory (doesn't exist, chosen by ${chosenBy}): ${cfg.shared}
+    return `  1. Shared directory (will be created): ${cfg.share}
 
-      Meaning:
-
-      * This command will create this directory on your local filesystem and
-        mount it into the demo as an empty directory.
-      * You will need to sync files into this directory from inside the demo.
-        Run 'demo help sync' to learn how.`;
+    * This command will create this directory on your local filesystem and
+      mount it into the demo as an empty directory.
+    * You will need to sync files into this directory from inside the demo.
+      Run 'demo help sync' to learn how.`;
 }
 
 function msgSharedExists(cfg) {
     var chosenBy = cfg.explicitShare ? "you" : "us";
     
-    return `  Shared directory (exists, chosen by ${chosenBy}): ${cfg.shared}
+    return `  1. Shared directory (already exists): ${cfg.share}
 
-      Meaning:
-
-      * This command will simply mount this directory into the demo, exposing
-        all of its files and subdirectories to the demo.
-      * Be careful about what data you expose to any demo. Best practice is
-        to use an empty directory or data from this demo.`;
+    * This command will simply mount this directory into the demo, exposing
+      all of its files and subdirectories to the demo.
+    * Be careful about what data you expose to any demo. Best practice is
+      to use an empty directory or data from this demo.`;
 }
 
-const msgPortNone =
-`  Access demo files over http: no
+const msgPortNone = `  2. No access to demo files over http
 
-      Meaning: 
-
-      * You can only view and edit files from within the demo's shell using 
-        Linux command line programs like cat, less, emacs, and vi. This means
-        that you won't be able to view any graphics, pdfs, or interative
-        notebooks in the demo from your browser`;
+    * You can only view and edit files from within the demo's shell using 
+      Linux command line programs like cat, less, emacs, and vi. This means
+      that you won't be able to view any graphics, pdfs, or interative
+      notebooks in the demo from your browser`;
 
 function msgPort(cfg) {
-    return `  Access demo files over http: yes, at localhost:${cfg.port}
+    return `  2. Demo files will be browseable at: localhost:${cfg.port}
 
-      Meaning:
-
-      * You can easily copy any file out of the demo using wget or curl.
-      * You can easily view graphics, pdfs, and interactive notebooks
-        in the demo from your browser.`;
+    * Copy any file out of the demo using wget or curl.
+    * View graphics, pdfs, and interactive notebooks and any other files in
+      the demo from your browser.`;
 }
 
 
-function printChoices(args, sharedDir, port) {
-    var cfg = config(args, sharedDir, port);
-    
+function printChoices(config) {
     // Print header message.
-    console.log("Demo " + cfg.image + " will be launched with:");
+    console.log("\nYour configuration of a demo shell for '" + config.image + "':");
 
     // Delimiter
-    console.log("\n------\n");
+    console.log("");
 
     // Print shared directory configuration.
-    if (cfg.noShare) {
+    if (config.noShare) {
         console.log(msgSharedNone);
     }
-    else if (cfg.createShare) {
-        console.log(msgSharedNeedsCreate(cfg));
+    else if (config.createShare) {
+        console.log(msgSharedNeedsCreate(config));
     }
     else {
-        console.log(msgSharedExists(cfg));
+        console.log(msgSharedExists(config));
     }
 
     // Delimiter
-    console.log("\n------\n");
+    console.log("");
 
-    if (cfg.noPort) {
+    if (config.noPort) {
         console.log(msgPortNone);
     }
     else {
-        console.log(msgPort(cfg));
+        console.log(msgPort(config));
     }
     
     // Delimiter
-    console.log("\n------\n");
-    
-    console.log("Are you sure you want these options?");
-    console.log("Type 'y' to confirm and anything else to abort ...");
+    console.log("");
 }
 
 function createSharedDirectory(dir, exit) {
@@ -401,14 +355,127 @@ function createSharedDirectory(dir, exit) {
     }
 }
 
+// This command:
+//
+//   docker inspect -f '{{.State.Running}}' name
+//
+// Returns:
+//   1. error if name doesn't exist
+//   2. false if name does exist and container isn't running
+//   3. true if name does exist and container is running
+//
+// So:
+//
+//   Case 1: Run docker run --name name
+//   Case 2: Run docker run name and re-execute docker run --name name
+//   Case 3: Run docker exec with name
+//
+// At the moment, don't check if shares or port mappings would
+// conflict, but add that in later.
+
+//
+// I just learned that exiting from the run shell force quits you
+// from the exec shell. So probably what we want is to run the
+// demo in the background if it's not already running.
+
 function launchShell(config) {
-    // Should probably check if the container needs to be
-    // run or whether we can just use exec. Would be nice
-    // to have an option for this.
+    var result = dockerInspect(config.name);
+
+    if (result == INSPECT_NOEXIST) {
+        return dockerRun(config);
+    }
+
+    if (result == INSPECT_EXISTS_RUNNING) {
+        return dockerExec(config);
+    }
+
+    if (result == INSPECT_EXISTS_STOPPED) {
+        var removed = dockerRemove(config.name);
+        if (!removed) {
+            return {
+                status: 1,
+                error: Error("failed to remove " + config.name + " from docker ps")
+            };
+        }
+        return dockerRun(config);
+    }
+
+    if (result == INSPECT_ERROR) {
+        return {
+            status: 1,
+            error: Error("failed to launch or kill 'docker inspect'")
+        };
+    }
+
+    return {
+        status: 1,
+        error: Error("ran 'docker inspect -f {{.State.Running}} " + name + "', but output is not expected ('true' or 'false')")
+    };
+}
+
+const INSPECT_UNDEFINED = -2;
+const INSPECT_ERROR = -1;
+const INSPECT_NOEXIST  = 0;
+const INSPECT_EXISTS_STOPPED  = 1;
+const INSPECT_EXISTS_RUNNING = 2;
+
+function dockerInspect(name) {
+    var result = proc.spawnSync("docker", ["inspect", "-f", "'{{.State.Running}}'", name]);
+    if (result.error) {
+        return INSPECT_ERROR;
+    }
     
+    if (result.status > 0) {
+        return INSPECT_NOEXIST;
+    }
+
+    var falseMatch = '/false\n$/';    
+    if (falseMatch.test(result.stdout)) {
+        return INSPECT_EXISTS_STOPPED;
+    }
+
+    var trueMatch = '/true\n$/';
+    if (trueMatch.test(result.stdout)) {
+        return INSPECT_EXISTS_STOPPED;
+    }
+    
+    return INSPECT_UNDEFINED;
+}
+
+function dockerRemove(name) {
+    var result = proc.spawnSync("docker", ["rm", name]);
+    if (result.error || result.status > 0) {
+        return false;
+    }
+    return true;
+}
+
+// docker exec -w /root -it name /bin/bash
+function dockerExec(config) {
+    var args = ['exec'];
+
+    // Working dir is /root (home dir)
+    args.push('-w');
+    args.push('/root');
+
+    // Attach stdin and tty
+    args.push('-it');
+
+    args.push(config.name);
+    args.push('/bin/bash');
+
+    // Finally Run the command
+    return proc.spawnSync("docker", args, { stdio: 'inherit' });
+}
+
+        dockerRun(config)function dockerRun(config) {
     // docker run
     var args = ['run'];
 
+    // Pass back a name for the container
+    args.push('--name');
+    args.push(config.name);
+    
     // Working dir is /root (home dir)
     args.push('-w');
     args.push('/root');
@@ -422,7 +489,7 @@ function launchShell(config) {
     // Expose port if needed.
     if (!config.noPort) {
         args.push('-p');
-        args.push(config.port + ":9555");
+        args.push(config.port + ":4444");
     }
 
     // Attach stdin and tty
@@ -432,7 +499,14 @@ function launchShell(config) {
     args.push(config.image);
 
     // Finally Run the command
-    return proc.spawnSync("docker", args);
+    return proc.spawnSync("docker", args, { stdio: 'inherit' });
+}
+
+function printRerun(result) {
+    console.log();
+    console.log("To rerun manually, execute: ");
+    console.log(result.args.join(' '));
+    console.log();
 }
 
 function msgFailure(result) {
@@ -441,3 +515,15 @@ function msgFailure(result) {
     }
     return result.stderr.toString();
 }
+
+/////////////////////////////////////////////////////////////////
+//
+// Exports
+//
+/////////////////////////////////////////////////////////////////
+
+module.exports = {
+    spec: cliSpec,
+    usage: usageSpec,
+    exec: exec
+};
