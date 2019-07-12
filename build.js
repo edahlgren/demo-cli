@@ -1,4 +1,5 @@
 
+const fs = require('fs');
 const proc = require('child_process');
 const demo = require('./demo.js');
 const toml = require('./toml.js');
@@ -14,7 +15,7 @@ const usageSpec = {
     shortDescription: 'Run a demo',
     examples: [],
     formats: [
-        'demo bulid',
+        'demo build',
         'demo bulid --help'
     ],
     options: [],
@@ -30,6 +31,10 @@ function exec(args, exit) {
         exit(1, "Can't run 'demo bulid' from outside of a demo shell");
     }
 
+    if (!fs.existsSync('/demo/Demofile.build')) {
+        exit(1, "Can't run 'demo build' without /demo/Demofile.build");
+    }
+    
     // TODO: implement --help
     // TODO: implement interactively choose a build
     // TODO: implement build by name to avoid interactive prompt
@@ -38,24 +43,24 @@ function exec(args, exit) {
     exit(0);
 }
 
-function demofileBuild(exit) {
+function demofileBuild(file, exit) {
     try {
-        doDemofileBuild(exit);
+        doDemofileBuild(file, exit);
     } catch (error) {
         exit(1, 'demo bulid exited unexpectedly: ' + error.toString());
     }        
 }
 
-function doDemofileBuild(exit) {
+function doDemofileBuild(file, exit) {
     // Parse the internal Demofile
-    var data = toml.parse('/setup/Demofile', exit);
+    var data = toml.parse(file, exit);
     assertHasDataForBuild(data, exit);
 
     // Get the default config
-    var config = data.build[data.build.default];
+    var config = data.build.preconfigured[data.build.default];
 
     // Print the run we're executing
-    printBuild(data.build.default, config);
+    printBuild(config);
 
     // Change directory if necessary
     var cwd = process.cwd();
@@ -65,7 +70,7 @@ function doDemofileBuild(exit) {
     }
     
     // Run the demo
-    var result = proc.spawnSync(config.exec);
+    var result = proc.spawnSync('/bin/bash', [config.script]);
 
     // Switch back.
     if (needsSwitch) {
@@ -93,10 +98,9 @@ function assertHasDataForBuild(data, exit) {
 }
 
 function printBuild(name, config) {
-    console.log("Running: [" + bare + "]:");
-    console.log(config.doc);
+    console.log("---");
     console.log("");
-    console.log('\t' + config.exec + ' ' + config.args.join(' '));
+    console.log("Building demo [" + config.description + "]:");
     console.log("");
     console.log("---");
 }

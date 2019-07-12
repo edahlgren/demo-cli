@@ -7,7 +7,8 @@ demo = 'dm/ant-colony-search'
 ########################################################
 
 [source]
-dirs = ['/root/src/ACOTSP-1.03']
+name = "ACOTSP"
+dir = ['/root/src/ACOTSP-1.03']
 
   [source.note.parse]
   file = '/root/src/ACOTSP-1.03/parse.c'

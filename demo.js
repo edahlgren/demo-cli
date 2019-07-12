@@ -2,7 +2,7 @@
 const fs = require('fs');
 
 function insideDemo() {
-    return fs.existsSync('/setup/Demofile');
+    return fs.existsSync('/demo');
 }
 
 module.exports = {

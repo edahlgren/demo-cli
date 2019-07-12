@@ -11,17 +11,14 @@ url = "http://www.math.uwaterloo.ca/tsp/world/countries.html"
 cities = "Number of cities in the dataset"
 optimal_tour = "Length of an optimal or near-optimal (within <= 0.1%) tour"
 
-# Data sets
-[data]
-
-  [data.westsahara]
-  urls = [
-    "http://www.math.uwaterloo.ca/tsp/world/wi29.tsp",
-    "http://www.math.uwaterloo.ca/tsp/world/witour.gif",
-  ]
-  doc = "Western Sahara"
-  cities = 29
-  optimal_tour = 27603
+[data.westsahara]
+urls = [
+  "http://www.math.uwaterloo.ca/tsp/world/wi29.tsp",
+  "http://www.math.uwaterloo.ca/tsp/world/witour.gif",
+]
+description = "Western Sahara"
+cities = 29
+optimal_tour = 27603
 
   [data.djibouti]
   urls = [

@@ -1,4 +1,5 @@
 
+const fs = require('fs');
 const proc = require('child_process');
 const demo = require('./demo.js');
 const toml = require('./toml.js');
@@ -30,35 +31,42 @@ function exec(args, exit) {
         exit(1, "Can't run 'demo run' from outside of a demo shell");
     }
 
+    if (!fs.existsSync('/demo/Demofile.run')) {
+        exit(1, "Can't run 'demo run' without /demo/Demofile.run");
+    }
+    
     // TODO: implement --help
     // TODO: implement interactively choose a run
     // TODO: implement run by name to avoid interactive prompt
 
-    demofileRun(exit);
+    demofileRun('/demo/Demofile.run', exit);
     exit(0);
 }
 
-function demofileRun(exit) {
+function demofileRun(file, exit) {
     try {
-        doDemofileRun(exit);
+        doDemofileRun(file, exit);
     } catch (error) {
         exit(1, 'demo run exited unexpectedly: ' + error.toString());
     }        
 }
 
-function doDemofileRun(exit) {
+function doDemofileRun(file, exit) {
     // Parse the internal Demofile
-    var data = toml.parse('/setup/Demofile', exit);
+    var data = toml.parse(file, exit);
     assertHasDataForRun(data, exit);
 
     // Get the default config
-    var config = data.run[data.run.default];
+    var config = data.run.preconfigured[data.run.default];
 
-    // Print the run we're executing
-    printRun(data.run.default, config);
+    // Read the script content
+    var scriptContent = readScript(config.script, exit);
+    
+    // Print what we're executing
+    printRun(config, scriptContent);
 
     // Run the demo
-    var result = proc.spawnSync(config.exec, config.args);
+    var result = proc.spawnSync('/bin/bash', [config.script]);
     
     // Bail on failure to execute the run
     if (result.error || result.status > 0) {
@@ -80,11 +88,20 @@ function assertHasDataForRun(data, exit) {
     // and make sure they have all the needed data.
 }
 
-function printRun(name, config) {
-    console.log("Running: [" + name + "]:");
-    console.log(config.doc);
+function readScript(file, exit) {
+    try {
+        return fs.readFileSync(file, 'utf8');
+    } catch (error) {
+        exit(1, "Couldn't read script '" + file + "': " + error.toString());
+    }
+}
+
+function printRun(config, script) {
+    console.log("---");
     console.log("");
-    console.log('\t' + config.exec + ' ' + config.args.join(' '));
+    console.log("Running demo [" + config.description + "]:");
+    console.log("");
+    console.log(script);
     console.log("");
     console.log("---");
 }
