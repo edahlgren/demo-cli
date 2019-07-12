@@ -1,0 +1,1 @@
+OPTIM_FLAGS=-O3 make

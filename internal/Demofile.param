@@ -1,0 +1,96 @@
+demo = 'dm/ant-colony-search'
+
+########################################################
+#
+# 'demo help params'
+#
+########################################################
+
+[param]
+
+  [param.tries]
+  options = ["-r", "--tries"]
+  description = "Number of independent trials"  
+  default = "10"
+
+  [param.tours]
+  options = ["-s", "--tours"]
+  description = "Number of steps in each trial"
+  default = "0"
+
+  [param.time]
+  options = ["-t", "--time"]
+  description = "Maximum time for each trial in seconds"
+  default = "10"
+
+  [param.seed]
+  options = ["--seed"]
+  description = "Seed for the random number generator"
+  default = "(current time)"
+
+  [param.optimum]
+  options = ["-o", "--optimum"]
+  description = "Stop if tour better or equal to optimum is found"
+  default = "1"
+
+  [param.ants]
+  options = ["-m", "--ants"]
+  description = "Number of ants"
+  default = "25"  
+
+  [param.nnants]
+  options = ["-g", "--nnants"]
+  description = "Nearest neighbours in tour construction"
+  default = "20"
+
+  [param.alpha]
+  options = ["-a", "--alpha"]
+  description =  "Alpha (influence of pheromone trails)"
+  default = "1.0"
+
+  [param.beta]
+  options = ["-b", "--beta"]
+  description = "Beta (influence of heuristic information)"
+  default = "2.0"
+
+  [param.rho]
+  options = ["-e", "--rho"]
+  description = "Rho: pheromone trail evaporation"
+  default = "0.5"
+
+  [param.q0]
+  options = ["-q", "--q0"]
+  description = "q_0: prob. of best choice in tour construction"
+  default = "0.0"
+
+  [param.elitistants]
+  options = ["-c", "--elitistants"]
+  description = "Number of elitist ants"
+  method = 2
+  default = "0"
+
+  [param.rasranks]
+  options = ["-f", "--rasranks"]
+  description = "Number of ranks in rank-based Ant System"
+  method = 3
+  default = "0"
+
+  [param.localsearch]
+  options = ["-l", "--localsearch"]
+  description = "0: no local search   1: 2-opt   2: 2.5-opt   3: 3-opt"
+  default = "3" 
+
+  [param.nnls]
+  options = ["-k", "--nnls"]
+  description = "Number of nearest neighbors for local search"
+  default = "20"
+
+  [param.dlb]
+  options = ["-d", "--dlb"]
+  description = "Use don't look bits in local search"
+  default = "true"
+
+  [param.quiet]
+  options = ["--quiet"]
+  description = "Reduce output to a minimum"
+  default = "false"

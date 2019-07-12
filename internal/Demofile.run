@@ -1,0 +1,22 @@
+demo = 'dm/ant-colony-search'
+
+########################################################
+#
+# 'demo run'
+#
+########################################################
+
+[run]
+default = "easy"
+
+  [run.preconfigured.easy]
+  exec = '/root/run/djibouti.sh'
+  description = "Djibouti - 38 cities"
+
+  [run.preconfigured.medium]
+  exec = '/root/run/qatar.sh'
+  description = "Qatar - 194 cities"
+
+  [run.preconfigured.difficult]
+  exec = '/root/run/luxembourg.sh'
+  description = "Luxembourg - 980 cities"

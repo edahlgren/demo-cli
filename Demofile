@@ -1,6 +1,8 @@
 
 demo = "dm/ant-colony-search"
-container = "dm.ant-colony-search"
+
+[docker]
+name = "dm.ant-colony-search"
 image = "ant-colony-test"
 
 [up]

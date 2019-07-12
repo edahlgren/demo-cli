@@ -1,7 +1,10 @@
 
 const proc = require('child_process');
 const fs = require('fs');
-const toml = require('toml');
+
+const demo = require('./demo.js');
+const toml = require('./toml.js');
+const docker = require('./docker.js');
 
 const cliSpec = [
     { name: 'image', defaultOption: true },
@@ -24,6 +27,11 @@ const usageSpec = {
 function exec(args, exit) {
     'use strict';
 
+    // This command doesn't work inside a demo shell
+    if (demo.inside()) {
+        exit(1, "Can't run 'demo kill' from within a demo shell");
+    }
+    
     // Check for image or demo file.
     var hasImage = args.hasOwnProperty('image');
     var hasDemofile = args.hasOwnProperty('demofile');
@@ -33,98 +41,57 @@ function exec(args, exit) {
 
     // Handle easy case first: configuration is already specified.
     if (hasDemofile) {
-        try {
-            doDemofileDown(args, exit);
-        } catch (error) {
-            exit(1, "'demo down' exited unexpected: " + error.toString());
-        }
+        demofileDown(args, exit);
+        exit(0);
     }
 
     exit(1, "'demo down <demo-image>' not yet implemented");
 }
 
+function demofileDown(args, exit) {
+    try {
+        doDemofileDown(args, exit);
+    } catch (error) {
+        exit(1, "'demo down' exited unexpected: " + error.toString());
+    }    
+}
+
 function doDemofileDown(args, exit) {
-    if (!fs.existsSync(args.demofile)) {
-        exit(1, "No demo file or demo file '" + args.demofile + "' doesn't exist"); 
-    }
+    var data = toml.parse(args.demofile, exit);
+    assertHasDataForDown(data, exit);
+
+    assertUp(data.container, exit);
     
-    var contents = '';
-    try {
-        contents = fs.readFileSync(args.demofile, 'utf8');
-    } catch (error) {
-        exit(1, "Couldn't read demo file '" + args.demofile + "': " + error.toString());
-    }
+    var result = docker.kill({
+        name: data.container
+    });
     
-    var _data = {};
-    try {
-        _data = toml.parse(contents);
-    } catch (error) {
-        exit(1, "Couldn't read demo file '" + args.demofile + "': " + error.toString());
+    if (result.error || result.status > 0) {
+        exit(1, msgFailure(result));
     }
 
-    var data = {};
-    try {
-        data.container = _data.container;
-    } catch (error) {
+    console.log("Demo is down");
+}
+
+function assertHasDataForDown(data, exit) {
+    // TODO: Check one-by-one and throw an error at each missing
+    // config line.
+    if (!data.container) {
         console.error("Malformed Demofile:");
         console.log(JSON.stringify(data));
         exit(1, "Run 'demo up <demo-image>' to interactively recreate it");
     }
+}
 
-    // Replace slashes with dots, otherwise docker gets mad.
-    data.demo = data.container.replace('/', '.');
-
+function assertUp(container, exit) {
     try {
-        let result = dockerInspect(data.demo);
-        if (result != INSPECT_EXISTS_RUNNING) {
-            exit(0, "Demo isn't up, so cannot bring it down");
+        if (docker.inspect(container) != docker.CONTAINER_RUNNING) {
+            exit(0, "Demo isn't up, run 'demo up' first");
         }
     } catch (error) {
         console.error(error);
         exit(1, "Failed to use 'docker inspect' to run pre-checks, run with 'demo up --force' to skip pre-checks");
     }
-
-    var result = dockerKill(data.demo);
-    if (result.error || result.status > 0) {
-        exit(1, msgFailure(result));
-    }
-    
-    console.log("Demo is down");
-    exit(0);
-}
-
-function dockerKill(name) {
-    return proc.spawnSync("docker", ["kill", name]);
-}
-
-const INSPECT_NOEXIST  = 0;
-const INSPECT_EXISTS_STOPPED  = 1;
-const INSPECT_EXISTS_RUNNING = 2;
-
-function dockerInspect(name) {
-    var result = proc.spawnSync("docker", ["inspect", "-f", "'{{.State.Running}}'", name]);
-    if (result.error) {
-        throw new Error("failed to launch 'docker inspect'");
-    }
-    
-    if (result.status > 0) {
-        return INSPECT_NOEXIST;
-    }
-
-    // Check stdout for true or false
-    var out = result.stdout.toString();
-    
-    var falseMatch = "'false'\n";
-    if (out === falseMatch) {
-        return INSPECT_EXISTS_STOPPED;
-    }
-    
-    var trueMatch = "'true'\n";
-    if (out === trueMatch) {
-        return INSPECT_EXISTS_RUNNING;
-    }
-
-    throw new Error("'docker inspect' failed: " + result.stderr.toString());
 }
     
 function msgFailure(result) {

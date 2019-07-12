@@ -1,0 +1,283 @@
+# Merged Demofile
+
+demo = 'dm/ant-colony-search'
+
+########################################################
+#
+# 'demo run'
+#
+########################################################
+
+[run]
+default = "easy"
+
+  [run.preconfigured.easy]
+  exec = '/root/run/djibouti.sh'
+  description = "Djibouti - 38 cities"
+
+  [run.preconfigured.medium]
+  exec = '/root/run/qatar.sh'
+  description = "Qatar - 194 cities"
+
+  [run.preconfigured.difficult]
+  exec = '/root/run/luxembourg.sh'
+  description = "Luxembourg - 980 cities"
+
+########################################################
+#
+# 'demo build'
+#
+########################################################
+
+[build]
+default = "noconfig"
+
+  [build.preconfigured.noconfig]
+  exec = '/root/build/default.sh'
+  description = "Make with gcc"
+
+  [build.preconfigured.optimized]
+  exec = '/run/build/optimized.sh'
+  description = "Make with gcc -O3"
+
+  [build.preconfigured.debug]
+  exec = '/root/build/debug.sh'
+  description = "Make with gcc -g"
+
+dir = '/home/src/ACOTSP-1.03'
+config_files = ['/root/src/ACOTSP-1.03/Makefile']
+
+########################################################
+#
+# 'demo help algo'
+#
+########################################################
+
+[algo]
+
+  [algo.basic]
+  options = ["-u", "--as"]
+  description = "Basic Ant System"
+  docs = ["/root/papers/AntSystem.pdf"]
+  
+  [algo.elitist]
+  options = ["-v", "--eas"]
+  description = "Elitist Ant System"
+  docs = ["/root/papers/AntSystem.pdf"]
+
+  [algo.rank]
+  options = ["-w", "--ras"]
+  description = "Rank-based Ant System"
+  docs = ["/root/papers/RankBased.pdf"]
+
+  [algo.colony]
+  name = "Ant Colony System"
+  options = ["-z", "--acs"]
+  docs = ["/root/papers/AntColonySystem.pdf"]
+  
+  [algo.maxmin]
+  options = ["-x", "--mmas"]
+  description = "MAX-MIN Ant System
+  docs = ["/root/papers/MAXMIN.pdf"]
+
+  [algo.bestworst]
+  options = ["-y", "--bwas"]
+  description = "Best-worst Ant System"
+  docs = ["/root/papers/BestWorst.pdf"]
+
+########################################################
+#
+# 'demo help input'
+#
+########################################################
+
+[input]
+
+  [input.tspfile]
+  options = ["-i", "--tsplibfile"]
+  format = "file.tsp"
+  description = "A TSPLIB formatted file containing a graph, where edge weights represent distances between data points (e.g. cities)"
+  example = "/root/data/cities/djibouti/dj38.tsp"
+
+########################################################
+#
+# 'demo help output'
+#
+########################################################
+
+[output]
+
+  [output.best]
+  options = []
+  format = "best.DATASET"
+  description = "Statistics about the best (shortest) solutions found during each trial run"
+  example = ""
+
+  [output.cmp]
+  options = []
+  format = "cmp.DATASET"
+  description = "Statistics about all trial runs"
+  example = ""
+        
+  [output.stat]
+  options = []
+  file = "stat.DATASET"
+  description = "Raw statistics"
+  example = ""
+
+########################################################
+#
+# 'demo help params'
+#
+########################################################
+
+[param]
+
+  [param.tries]
+  options = ["-r", "--tries"]
+  description = "Number of independent trials"  
+  default = "10"
+
+  [param.tours]
+  options = ["-s", "--tours"]
+  description = "Number of steps in each trial"
+  default = "0"
+
+  [param.time]
+  options = ["-t", "--time"]
+  description = "Maximum time for each trial in seconds"
+  default = "10"
+
+  [param.seed]
+  options = ["--seed"]
+  description = "Seed for the random number generator"
+  default = "(current time)"
+
+  [param.optimum]
+  options = ["-o", "--optimum"]
+  description = "Stop if tour better or equal to optimum is found"
+  default = "1"
+
+  [param.ants]
+  options = ["-m", "--ants"]
+  description = "Number of ants"
+  default = "25"  
+
+  [param.nnants]
+  options = ["-g", "--nnants"]
+  description = "Nearest neighbours in tour construction"
+  default = "20"
+
+  [param.alpha]
+  options = ["-a", "--alpha"]
+  description =  "Alpha (influence of pheromone trails)"
+  default = "1.0"
+
+  [param.beta]
+  options = ["-b", "--beta"]
+  description = "Beta (influence of heuristic information)"
+  default = "2.0"
+
+  [param.rho]
+  options = ["-e", "--rho"]
+  description = "Rho: pheromone trail evaporation"
+  default = "0.5"
+
+  [param.q0]
+  options = ["-q", "--q0"]
+  description = "q_0: prob. of best choice in tour construction"
+  default = "0.0"
+
+  [param.elitistants]
+  options = ["-c", "--elitistants"]
+  description = "Number of elitist ants"
+  method = 2
+  default = "0"
+
+  [param.rasranks]
+  options = ["-f", "--rasranks"]
+  description = "Number of ranks in rank-based Ant System"
+  method = 3
+  default = "0"
+
+  [param.localsearch]
+  options = ["-l", "--localsearch"]
+  description = "0: no local search   1: 2-opt   2: 2.5-opt   3: 3-opt"
+  default = "3" 
+
+  [param.nnls]
+  options = ["-k", "--nnls"]
+  description = "Number of nearest neighbors for local search"
+  default = "20"
+
+  [param.dlb]
+  options = ["-d", "--dlb"]
+  description = "Use don't look bits in local search"
+  default = "true"
+
+  [param.quiet]
+  options = ["--quiet"]
+  description = "Reduce output to a minimum"
+  default = "false"
+  
+########################################################
+#
+# 'demo inspect source'
+#
+########################################################
+
+[source]
+dirs = ['/root/src/ACOTSP-1.03']
+
+  [source.note.parse]
+  file = '/root/src/ACOTSP-1.03/parse.c'
+  description = "Parses commandline parameters"
+
+  [source.note.init]
+  file = '/root/src/ACOTSP-1.03/InOut.c'
+  description = "Initializes the ant colony"
+
+  [source.note.algorithm]
+  file = '/root/src/ACOTSP-1.03/acotsp.c'
+  description = "Implements ant searching to solve TSP"
+
+description = "Implements six ant colony optimization algorithms that solve traveling salesman problems"
+authors = []
+version = "1.03"
+license = '/root/src/ACOTSP-1.03/gpl.txt'
+entrypoints = ['/home/src/ACOTSP-1.03/acotsp.c']
+
+########################################################
+#
+# 'demo inspect data'
+#
+########################################################
+
+[data]
+
+  [data.source.national-tsp]
+  file = '/root/data/cities/Demofile'
+
+  [data.djibouti]
+  dir = "/root/data/cities/djibouti"
+  files = [
+    "dj38.tsp",
+    "djtour.gif",
+  ]
+  source = 'national-tsp/djibouti'
+
+  [data.qatar]
+  dir = "/root/data/cities/qatar"
+  files = [
+    "qa194.tsp",
+    "qatour.gif",
+  ]
+  source = 'national-tsp/qatar'
+
+  [data.luxembourg]
+  dir = "/home/data/cities/luxembourg"
+  files = [
+    "lu980.tsp",
+    "lutour.gif",
+  ]
+  source = 'national-tsp/luxembourg'

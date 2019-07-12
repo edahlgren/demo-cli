@@ -1,0 +1,39 @@
+demo = 'dm/ant-colony-search'
+
+########################################################
+#
+# 'demo help algo'
+#
+########################################################
+
+[algo]
+
+  [algo.basic]
+  options = ["-u", "--as"]
+  description = "Basic Ant System"
+  docs = ["/root/papers/AntSystem.pdf"]
+  
+  [algo.elitist]
+  options = ["-v", "--eas"]
+  description = "Elitist Ant System"
+  docs = ["/root/papers/AntSystem.pdf"]
+
+  [algo.rank]
+  options = ["-w", "--ras"]
+  description = "Rank-based Ant System"
+  docs = ["/root/papers/RankBased.pdf"]
+
+  [algo.colony]
+  name = "Ant Colony System"
+  options = ["-z", "--acs"]
+  docs = ["/root/papers/AntColonySystem.pdf"]
+  
+  [algo.maxmin]
+  options = ["-x", "--mmas"]
+  description = "MAX-MIN Ant System
+  docs = ["/root/papers/MAXMIN.pdf"]
+
+  [algo.bestworst]
+  options = ["-y", "--bwas"]
+  description = "Best-worst Ant System"
+  docs = ["/root/papers/BestWorst.pdf"]

@@ -5,12 +5,19 @@ doc = 'Ant Colony Optimization Search Demo (Traveling Salesman)'
 
 # Run the demo
 [run]
+  preconfigured = ["easy", "medium", "hard"]
+  default = "easy"
 
-  [run.preconfigured.0]
+  [run.easy]
   doc = """
         Find the shortest roundtrip through Djibouti (38 cities) \
         using an artificial ant colony and the MAX-MIN method
         """
+        
+  # It might be better if these are just bash scripts, because there
+  # could be environment variables, args, and loads of shit. And then
+  # just have the docs be in the same directory, and we can read the
+  # file and print from it. This is a bit too complicated honestly.
   exec = '/home/bin/acotsp'
   args = [
     '--mmas',
@@ -26,7 +33,7 @@ doc = 'Ant Colony Optimization Search Demo (Traveling Salesman)'
   ]
 
   # Another pre-configured run
-  [run.preconfigured.1]
+  [run.medium]
   doc = """
         Find the shortest roundtrip through Qatar (194 cities) \
         using an artificial ant colony and the MAX-MIN method
@@ -46,7 +53,7 @@ doc = 'Ant Colony Optimization Search Demo (Traveling Salesman)'
   ]
 
   # Another pre-configured run
-  [run.preconfigured.2]
+  [run.hard]
   doc = """
         Find the shortest roundtrip through Luxembourg (980 cities) \
         using an artificial ant colony and the MAX-MIN method
@@ -256,27 +263,29 @@ doc = 'Ant Colony Optimization Search Demo (Traveling Salesman)'
 
 # Build the demo
 [build]
+  preconfigured = ["bare", "optimized", "debug"]
+  default = "bare"
 
-  [build.preconfigured.0]
+  [build.bare]
   doc = """
         Default build
         """
-  chdir = '/home/src/ACOTSP-1.03'
+  dir = '/home/src/ACOTSP-1.03'
   exec = 'make'
 
-  [build.preconfigured.1]
+  [build.optimized]
   doc = """
         Optimized build
         """
-  chdir = '/home/src/ACOTSP-1.03'
+  dir = '/home/src/ACOTSP-1.03'
   exec = 'make'
   env = ["OPTIM_FLAGS=-O3"]
 
-  [build.preconfigured.2]
+  [build.debug]
   doc = """
         Debug build
         """
-  chdir = '/home/src/ACOTSP-1.03'
+  dir = '/home/src/ACOTSP-1.03'
   exec = 'make'
   env = ["CFLAGS=-g"]
 

@@ -1,0 +1,36 @@
+demo = 'dm/ant-colony-search'
+
+########################################################
+#
+# 'demo inspect data'
+#
+########################################################
+
+[data]
+
+  [data.source.national-tsp]
+  file = '/root/data/cities/Demofile'
+
+  [data.djibouti]
+  dir = "/root/data/cities/djibouti"
+  files = [
+    "dj38.tsp",
+    "djtour.gif",
+  ]
+  source = 'national-tsp/djibouti'
+
+  [data.qatar]
+  dir = "/root/data/cities/qatar"
+  files = [
+    "qa194.tsp",
+    "qatour.gif",
+  ]
+  source = 'national-tsp/qatar'
+
+  [data.luxembourg]
+  dir = "/home/data/cities/luxembourg"
+  files = [
+    "lu980.tsp",
+    "lutour.gif",
+  ]
+  source = 'national-tsp/luxembourg'

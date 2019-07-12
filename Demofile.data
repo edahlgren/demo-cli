@@ -1,6 +1,6 @@
 # Sample Demo Magazine TOML file
 
-id = 'dm/national-tsp'
+id = 'national-tsp'
 doc = 'National Traveling Salesman Problem Datasets'
 
 [source]
