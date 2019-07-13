@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 
 const cli = require('command-line-args');
-const shell = require('./shell');
+
+// Commands
 const help = require('./help');
 const up = require('./up');
 const down = require('./down');
+const shell = require('./shell');
+const run = require('./run');
+const build = require('./build');
+const inspect = require('./inspect');
+const share = require('./share');
+const sync = require('./sync');
 
 const cliSpec = [
     { name: 'help', alias: 'h', type: Boolean },
@@ -102,11 +109,40 @@ function main() {
         var shellArgs = cli(shell.spec, { argv });
         shell.exec(shellArgs, exit);
         break;
+
+    case 'run':
+        // Does this throw an error?
+        var runArgs = cli(run.spec, { argv });
+        run.exec(runArgs, exit);
+        break;
+
+    case 'build':
+        // Does this throw an error?
+        var buildArgs = cli(build.spec, { argv });
+        build.exec(buildArgs, exit);
+        break;
+
+    case 'inspect':
+        // Does this throw an error?
+        var inspectArgs = cli(inspect.spec, { argv });
+        inspect.exec(inspectArgs, exit);
+        break;
+
+    case 'share':
+        // Does this throw an error?
+        var shareArgs = cli(share.spec, { argv });
+        share.exec(shareArgs, exit);
+        break;
+
+    case 'sync':
+        // Does this throw an error?
+        var syncArgs = cli(sync.spec, { argv });
+        sync.exec(syncArgs, exit);
+        break;
         
     default:
         exit(1, "command '" + args.command + "' not implemented");
     }
 }
 
-// Run it!
 main();
