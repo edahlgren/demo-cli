@@ -62,11 +62,11 @@ function doDemofileShell(args, exit) {
     assertHasDataForShell(data, exit);
 
     // Assert that the container is actually running
-    assertUp(data.container, exit);
+    assertUp(data.docker.name, exit);
 
     // Exec /bin/bash into the container
     var result = docker.execBash({
-        name: data.container
+        name: data.docker.name
     });
 
     // Bail on failure to execute the docker command
@@ -76,18 +76,18 @@ function doDemofileShell(args, exit) {
 }
 
 function assertHasDataForShell(data, exit) {
-    // TODO: Check one-by-one and throw an error at each missing
-    // config line.
-    if (!data.container) {
-        console.error("Malformed Demofile:");
-        console.log(JSON.stringify(data));
-        exit(1, "Run 'demo shell <demo-image>' to interactively recreate it");
+    if (!data.docker) {
+        exit(1, "Malformed Demofile: needs a [docker] section");
+    }
+    if (!data.docker.name) {
+        exit(1, "Malformed Demofile: needs a 'name' field under [docker] section");
     }
 }
 
-function assertUp(container, exit) {
+function assertUp(containerName, exit) {
     try {
-        if (docker.inspect(container) != docker.CONTAINER_RUNNING) {
+        let result = docker.inspect(containerName);
+        if (result != docker.CONTAINER_RUNNING) {
             exit(0, "Demo isn't up, run 'demo up' first");
         }
     } catch (error) {

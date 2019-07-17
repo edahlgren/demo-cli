@@ -1,5 +1,6 @@
 
 const fs = require('fs');
+const path = require('path');
 
 const demo = require('./demo.js');
 const toml = require('./toml.js');
@@ -54,7 +55,7 @@ function demofileUp(args, exit) {
     try {
         doDemofileUp(args, exit);
     } catch (error) {
-        exit(1, 'demo up exited unexpected: ' + error.toString());
+        exit(1, 'demo up exited unexpectedly: ' + error.toString());
     }
 }
 
@@ -62,27 +63,33 @@ function doDemofileUp(args, exit) {
     var data = toml.parse(args.demofile, exit);
     assertHasDataForUp(data, exit);
     
-    assertNotUp(data.container, exit);
+    assertNotUp(data.docker.name, exit);
 
-    var hasSharedDirectory = data.up.sharedDirectory.length > 0;
+    var hasSharedDirectory = data.up.shared_directory.length > 0;
     if (hasSharedDirectory) {
-        assertDirectoryExists(data.up.sharedDirectory, exit);
+        assertDirectoryExists(data.up.shared_directory, exit);
+
+        // Make it an absolute path if it's not already
+        if (!path.isAbsolute(data.up.shared_directory)) {
+            data.up.shared_directory =
+                path.join(process.cwd(), data.up.shared_directory);
+        }
     }
 
-    var hasHttpPort = data.up.httpPort > 0;
+    var hasHttpPort = data.up.http_port > 0;
     if (hasHttpPort) {
-        assertPortFree(data.up.httpPort, exit);
+        assertPortFree(data.up.http_port, exit);
     }    
     
-    var result = dockerRun({
-        name: data.container,
-        image: data.image,
+    var result = docker.run({
+        name: data.docker.name,
+        image: data.docker.image,
         
         hasShared: hasSharedDirectory,
-        sharedDirectory: data.up.sharedDirectory,
+        sharedDirectory: data.up.shared_directory,
         
         hasPort: hasHttpPort,
-        httpPort: data.up.httpPort
+        httpPort: data.up.http_port
     });
     
     if (result.error || result.status > 0) {
@@ -93,24 +100,32 @@ function doDemofileUp(args, exit) {
 }
 
 function assertHasDataForUp(data, exit) {
-    // TODO: Check one-by-one and throw an error at each missing
-    // config line.
-    if (!(data.container
-          && data.image
-          && data.up.sharedDirectory
-          && data.up.httpPort)) {
+    if (!data.docker) {
+        exit(1, "Malformed Demofile: needs a [docker] section");
+    }
+    if (!data.docker.name) {
+        exit(1, "Malformed Demofile: needs a 'name' field under [docker] section");
+    }
+    if (!data.docker.image) {
+        exit(1, "Malformed Demofile: needs an 'image' field under [docker] section");
+    }
 
-        console.error("Malformed Demofile:");
-        console.log(JSON.stringify(data));
-        exit(1, "Run 'demo up <demo-image>' to interactively recreate it");
+    if (!data.up) {
+        exit(1, "Malformed Demofile: needs an [up] section");
+    }
+    if (!data.up.shared_directory) {
+        exit(1, "Malformed Demofile: needs a 'shared_directory' field under [up] section");
+    }
+    if (!data.up.http_port) {
+        exit(1, "Malformed Demofile: needs an 'http_port' field under [up] section");
     }
 }
 
-function assertNotUp(container, exit) {
+function assertNotUp(containerName, exit) {
     try {
-        let result = docker.inspect(container);
+        let result = docker.inspect(containerName);
         if (result == docker.CONTAINER_STOPPED) {
-            exit(1, "Run 'docker rm " + data.name + "' to prevent a docker naming collision, use a different container_name in Demofile"); 
+            exit(1, "Run 'docker rm " + containerName + "' to prevent a docker naming collision, use a different container_name in Demofile"); 
         }
         if (result == docker.CONTAINER_RUNNING) {
             exit(0, "Demo is already up, run 'demo shell' to enter it");

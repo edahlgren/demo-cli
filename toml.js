@@ -22,5 +22,5 @@ function parseToml(file, exit) {
 }
 
 module.exports = {
-    parseToml: parseToml
+    parse: parseToml
 };

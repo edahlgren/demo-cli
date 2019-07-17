@@ -69,7 +69,7 @@ function exec(args, exit) {
         var result = rsync(src, dest, verbose, allowDelete);
         if (result.error || result.status > 0) {
             console.log("Unexpected error syncing '" +
-                        src + "' to '" + dest "': " + msgFailure(result));
+                        src + "' to '" + dest + "': " + msgFailure(result));
             exit(1, "Failed to completely sync");
         }
         

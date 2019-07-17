@@ -1,6 +1,9 @@
 
 const fs = require('fs');
 const proc = require('child_process');
+const readline = require('readline');
+const lineReader = require('line-reader');
+
 const demo = require('./demo.js');
 const toml = require('./toml.js');
 
@@ -39,8 +42,8 @@ function exec(args, exit) {
     // TODO: implement interactively choose a run
     // TODO: implement run by name to avoid interactive prompt
 
+    // Spawn the run script asynchronously to stream stdout.
     demofileRun('/demo/Demofile.run', exit);
-    exit(0);
 }
 
 function demofileRun(file, exit) {
@@ -59,33 +62,99 @@ function doDemofileRun(file, exit) {
     // Get the default config
     var config = data.run.preconfigured[data.run.default];
 
-    // Read the script content
-    var scriptContent = readScript(config.script, exit);
+    console.log("");
+    console.log("  ---------------------------------------------------------------------");
+    console.log("  | Running demo with the '" + data.run.default + "' configuration");                                        
+    console.log("  |");
+    console.log("  | For more pre-configured ways to run this demo, run 'demo run --help'");
+    console.log("  ---------------------------------------------------------------------");
+    console.log("");
     
-    // Print what we're executing
-    printRun(config, scriptContent);
-
-    // Run the demo
-    var result = proc.spawnSync('/bin/bash', [config.script]);
-    
-    // Bail on failure to execute the run
-    if (result.error || result.status > 0) {
-        exit(1, msgFailure(result));
+    // Create a regexp if only_log is present
+    var re;
+    if (config.only_log && config.only_log.length > 0) {
+        re = new RegExp(config.only_log);
     }
+    
+    // Show script
+    console.log('  [Command]\n');
+    var scriptContents = readScript(config.script, exit);
+    scriptContents.split('\n').forEach(function(line) {
+        console.log("  " + line);
+    });
+    
+    // Run the demo
+    var p = proc.spawn('/bin/bash', [config.script]);
+
+    // Deal with launch issues.
+    p.on('error', (error) => {
+        exit(1, "Failed to run demo: " + error.toString());
+    });
+
+    // Print progress
+    var first = true;
+    function log(line) {
+        if (first) {
+            console.log('  [Progress logs]\n');
+            first = false;
+        }
+        if (re && !re.test(line)) {
+            // Skip lines that don't match regex
+            return;
+        }
+        //readline.cursorTo(process.stdout, 0);
+        process.stdout.write("  " + line + '\n');
+    }
+    lineReader.eachLine(p.stdout, log);
+    
+    // Buffer stderr in case of an abnormal exit.
+    var stderr = "";
+    p.stderr.on('data', (data) => {
+        stderr += data.toString();
+    });
+
+    // Handle exit.
+    p.on('exit', (code) => {
+        process.exitCode = (code > 0 ? 1 : 0);
+    });
+
+    // Unfortunately can't call exit directly here (if successful)
+    // because we may miss some logs that nodejs hasn't flushed yet.
+    process.on('beforeExit', function(code) {
+        if (code > 0) {
+            exit(1, 'Demo exited unexpectedly: ' + stderr);
+        }
+        
+        console.log("");
+        console.log("  ---------------------------------------------------------------------");
+        console.log("  | For all data logged to stdout, see 'run.log'");
+        console.log("  ---------------------------------------------------------------------");
+        console.log("");
+        
+        console.log("  [Output files]\n");
+        config.output_files.forEach(function(output) {
+            console.log("  - " + output);
+        });
+        
+        console.log("");
+        console.log("  ---------------------------------------------------------------------");
+        console.log("  | To learn more about the command-line options, test data,");
+        console.log("  | and output files, run 'demo run --help'");
+        console.log("  ---------------------------------------------------------------------");
+        console.log("");
+    });
 }
 
 function assertHasDataForRun(data, exit) {
-    if (!(data.run
-          && data.run.preconfigured
-          && data.run.default)) {
-        
-        console.error("Malformed Demofile:");
-        console.log(JSON.stringify(data));
-        exit(1, "Needs a [run] section with preconfigured labels");
+    if (!data.run) {
+        exit(1, "Malformed Demofile: needs a [run] section");
     }
-
-    // TODO: iterate through the preconfigured runs
-    // and make sure they have all the needed data.
+    if (!data.run.default) {
+        exit(1, "Malformed Demofile: needs a 'default' field under [run] section");
+    }
+    if (!data.run.preconfigured) {
+        exit(1, "Malformed Demofile: needs a 'preconfigured' field under [run] section");
+    }
 }
 
 function readScript(file, exit) {
@@ -97,13 +166,10 @@ function readScript(file, exit) {
 }
 
 function printRun(config, script) {
-    console.log("---");
     console.log("");
-    console.log("Running demo [" + config.description + "]:");
+    console.log("Running demo with:");
     console.log("");
     console.log(script);
-    console.log("");
-    console.log("---");
 }
 
 function msgFailure(result) {

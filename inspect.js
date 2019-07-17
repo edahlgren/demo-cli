@@ -68,48 +68,57 @@ function printSourceInfo(file, exit) {
     assertHasDataForSource(data, exit);
     var source = data.source;
     
-    console.log("---");
     console.log("");
-    console.log("Source code [" + source.name + "]:");
+    console.log("  -------------------------------------------------------------------------------");
+    console.log("  | Source code in this demo                                                    |");
+    console.log("  -------------------------------------------------------------------------------");
     console.log("");
-    console.log(source.description);
+    
+    console.log("  " + source.description);
     console.log("");
-    console.log("\tauthors: " + source.authors.join(', '));
-    console.log("\tlicense: " + source.license);
-    console.log("\tversion: " + source.version);
-    console.log("");
-    console.log("\tdirectory: " + source.dir);
-    console.log("\tentrypoints: " + source.entrypoints.join(', '));
-    console.log("");
-    console.log("\tnotable:");
-    for (var key in source.note) {
-        if (source.note.hasOwnProperty(key)) {
-            var note = source.note[key];
-            console.log("\t\t" + "(" + key + ") " + note.description + ":");
-            console.log("\t\t" + note.file);
+    
+    for (var key in source.preconfigured) {
+        var repo = source.preconfigured[key];
+        
+        console.log("  [" + key + "]");
+        console.log("");
+        
+        console.log("    (authors) " + repo.authors.join(', '));
+        console.log("    (version) " + repo.version);
+        console.log("    (license) " + repo.license);
+        console.log("");
+        
+        console.log("    (files) " + repo.dir);
+        for (var n in repo.notable_files) {
+            var notable = repo.notable_files[n];
+            console.log("      " + notable.file + " - " + notable.description);
         }
+        console.log("");
     }
-    console.log("");
-    console.log("Run 'demo share source' to copy this directory into your shared directory.");
-    console.log("Run 'demo sync source' to copy changes in your shared directory to this directory.");
-    
-    console.log("");
-    console.log("---");
-    
 }
 
 function assertHasDataForSource(data, exit) {
-    if (!(data.source
-          && data.source.name
-          && data.source.dir
-          && data.source.description
-          && data.source.version
-          && data.source.license
-          && data.source.entrypoints)) {
-
-        console.error("Malformed Demofile:");
-        console.log(JSON.stringify(data));
-        exit(1, "Needs a [source] section with preconfigured labels");
+    if (!data.source) {
+        exit(1, "Malformed Demofile: needs a [source] section");        
+    }
+    if (!data.source.description) {
+        exit(1, "Malformed Demofile: needs a 'description' field under [source] section");        
+    }
+    
+    for (var key in data.source.preconfigured) {
+        var repo = data.source.preconfigured[key];
+        if (!repo.authors) {
+            exit(1, "Malformed Demofile: needs an 'author' field under [source.preconfigured." + key + "] section");
+        }
+        if (!repo.version) {
+            exit(1, "Malformed Demofile: needs a 'version' field under [source.preconfigured." + key + "] section");
+        }
+        if (!repo.license) {
+            exit(1, "Malformed Demofile: needs a 'license' field under [source.preconfigured." + key + "] section");
+        }
+        if (!repo.dir) {
+            exit(1, "Malformed Demofile: needs a 'dir' field under [source.preconfigured." + key + "] section");        
+        }
     }
 
     // TODO: iterate through the notes
@@ -126,49 +135,51 @@ function inspectData(file, exit) {
 
 function printDataInfo(file, exit) {
     var data = toml.parse(file, exit);
-    assertHasDataForSource(data, exit);
+    assertHasDataForData(data, exit);
     data = data.data;
-    
-    console.log("---");
-    console.log("");
-    console.log("Test data:");
-    console.log("");
-    console.log(data.description);
-    console.log("");
-    for (var key in data.preconfigured) {
-        if (data.preconfigured.hasOwnProperty(key)) {
-            var dataset = data.preconfigured[key];
 
-            console.log("\t[" + dataset.description + "]:");
-            console.log("");
-            console.log("\tdirectory: " + dataset.dir + ":");
-            console.log("\tfiles: ");
-            for (var i = 0; i < dataset.files.length; i++) {
-                console.log("\t* " + dataset.files[i] + ": " + dataset.fileDescriptions[i]);
-            }
-            dataset.extra.forEach(function(field) {
-                var desc = data.extra[field];
-                var value = dataset[field];
-                console.log("\t" + desc + ": " + value);
-            });
-            console.log("");
-            console.log("\tsource: " + dataset.source);
-            console.log("\turl: " + dataset.url);
-            console.log("");
-        }
-    }
     console.log("");
-    console.log("---");
+    console.log("  -------------------------------------------------------------------------------");
+    console.log("  | Data sets in this demo                                                      |");
+    console.log("  -------------------------------------------------------------------------------");
+    console.log("");
+    
+    console.log("  " + data.description);
+    console.log("");
+
+    var num = 1;
+    for (var key in data.preconfigured) {
+        var dataset = data.preconfigured[key];
+        console.log("  [" + key + "]");
+        console.log("");
+
+        dataset.extra.forEach(function(field) {
+            var desc = data.extra[field];
+            var value = dataset[field];
+            console.log("     (" + desc + ") " + value);
+        });
+        console.log("");
+        
+        console.log("     (files) " + dataset.dir);
+        for (var i = 0; i < dataset.files.length; i++) {
+            console.log("       " + dataset.files[i] + " - " + dataset.file_descriptions[i]);
+        }
+        console.log("");
+        num += 1;
+    }
+
+    console.log("");
 }
 
-function assertHasDataForSource(data, exit) {
-    if (!(data.data
-          && data.data.description
-          && data.data.preconfigured)) {
-
-        console.error("Malformed Demofile:");
-        console.log(JSON.stringify(data));
-        exit(1, "Needs a [data] section with preconfigured labels");
+function assertHasDataForData(data, exit) {
+    if (!data.data) {
+        exit(1, "Malformed Demofile: needs a [data] section");
+    }
+    if (!data.data.description) {
+        exit(1, "Malformed Demofile: needs a 'description' field under [data] section");
+    }
+    if (!data.data.preconfigured) {
+        exit(1, "Malformed Demofile: needs a 'preconfigured' field under [data] section");
     }
 
     // TODO: iterate through the preconfigured datasets

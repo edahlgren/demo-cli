@@ -29,7 +29,7 @@ function exec(args, exit) {
 
     // This command doesn't work inside a demo shell
     if (demo.inside()) {
-        exit(1, "Can't run 'demo kill' from within a demo shell");
+        exit(1, "Can't run 'demo down' from within a demo shell");
     }
     
     // Check for image or demo file.
@@ -60,10 +60,10 @@ function doDemofileDown(args, exit) {
     var data = toml.parse(args.demofile, exit);
     assertHasDataForDown(data, exit);
 
-    assertUp(data.container, exit);
+    assertUp(data.docker.name, exit);
     
     var result = docker.kill({
-        name: data.container
+        name: data.docker.name
     });
     
     if (result.error || result.status > 0) {
@@ -74,18 +74,18 @@ function doDemofileDown(args, exit) {
 }
 
 function assertHasDataForDown(data, exit) {
-    // TODO: Check one-by-one and throw an error at each missing
-    // config line.
-    if (!data.container) {
-        console.error("Malformed Demofile:");
-        console.log(JSON.stringify(data));
-        exit(1, "Run 'demo up <demo-image>' to interactively recreate it");
+    if (!data.docker) {
+        exit(1, "Malformed Demofile: needs a [docker] section");
+    }
+    if (!data.docker.name) {
+        exit(1, "Malformed Demofile: needs a 'name' field under [docker] section");
     }
 }
 
-function assertUp(container, exit) {
+function assertUp(containerName, exit) {
     try {
-        if (docker.inspect(container) != docker.CONTAINER_RUNNING) {
+        let result = docker.inspect(containerName);
+        if (result != docker.CONTAINER_RUNNING) {
             exit(0, "Demo isn't up, run 'demo up' first");
         }
     } catch (error) {

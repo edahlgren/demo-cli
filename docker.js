@@ -52,7 +52,7 @@ function dockerRun(config) {
     // Add shared directory if needed.
     if (config.hasShared) {
         args.push('-v');
-        args.push(config.sharedDirectory + ":/root/shared");
+        args.push(config.sharedDirectory + ":/shared");
     }
 
     // Expose port if needed.
@@ -67,6 +67,8 @@ function dockerRun(config) {
     // Add image name
     args.push(config.image);
 
+    console.log('docker ' + args);
+    
     // Finally run the command
     return proc.spawnSync("docker", args, { stdio: 'inherit' });
 }
