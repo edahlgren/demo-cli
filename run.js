@@ -10,6 +10,7 @@ const toml = require('./toml.js');
 // The CLI, using a spec compatible with the command-line-args
 // package.
 const cliSpec = [
+    { name: 'config', defaultOption: true },
     { name: 'help', alias: 'h', type: Boolean }
 ];
 
@@ -37,76 +38,86 @@ function exec(args, exit) {
     if (!fs.existsSync('/demo/Demofile.run')) {
         exit(1, "Can't run 'demo run' without /demo/Demofile.run");
     }
+
+    // Parse the internal Demofile
+    var data = toml.parse('/demo/Demofile.run', exit);
+    assertHasDataForRun(data, exit);
+
+    // Choose a configuration to use
+    var name = getConfigName(args, data, exit);
+    var isDefault = (name == data.run.default);
+    var config = data.run.preconfigured[name];
     
     // TODO: implement --help
     // TODO: implement interactively choose a run
-    // TODO: implement run by name to avoid interactive prompt
 
     // Spawn the run script asynchronously to stream stdout.
-    demofileRun('/demo/Demofile.run', exit);
+    demofileRun(name, config, isDefault, exit);
 }
 
-function demofileRun(file, exit) {
+function assertHasDataForRun(data, exit) {
+    if (!data.run) {
+        exit(1, "Malformed Demofile: needs a [run] section");
+    }
+    if (!data.run.default) {
+        exit(1, "Malformed Demofile: needs a 'default' field under [run] section");
+    }
+    if (!data.run.preconfigured) {
+        exit(1, "Malformed Demofile: needs a 'preconfigured' field under [run] section");
+    }
+}
+
+function getConfigName(args, data, exit) {
+    var hasConfig = args.hasOwnProperty('config');
+    if (hasConfig) {
+        var configIsDefined = false;
+        var keys = [];
+        for (key in data.run.preconfigured) {
+            keys.push(key);
+        }
+        if (!keys.includes(args.config)) {
+            exit(1, "Can't run demo with undefined preconfiguration '" +
+                 args.config + "' use one of [" + keys + "]"); 
+        }
+        return args.config;
+    }
+
+    // Use the default config by default.
+    return data.run.default;
+}
+
+function demofileRun(name, config, isDefault, exit) {
     try {
-        doDemofileRun(file, exit);
+        doDemofileRun(name, config, isDefault, exit);
     } catch (error) {
         exit(1, 'demo run exited unexpectedly: ' + error.toString());
     }        
 }
 
-function doDemofileRun(file, exit) {
-    // Parse the internal Demofile
-    var data = toml.parse(file, exit);
-    assertHasDataForRun(data, exit);
-
-    // Get the default config
-    var config = data.run.preconfigured[data.run.default];
+function doDemofileRun(name, config, isDefault, exit) {
 
     console.log("");
-    console.log("  ---------------------------------------------------------------------");
-    console.log("  | Running demo with the '" + data.run.default + "' configuration");                                        
-    console.log("  |");
-    console.log("  | For more pre-configured ways to run this demo, run 'demo run --help'");
-    console.log("  ---------------------------------------------------------------------");
+    console.log("---------------------------------------------------------------------");
+    console.log("| Running demo with the '" + name + "' configuration " + defaultStr(isDefault));
+    console.log("---------------------------------------------------------------------");
     console.log("");
-    
-    // Create a regexp if only_log is present
-    var re;
-    if (config.only_log && config.only_log.length > 0) {
-        re = new RegExp(config.only_log);
-    }
     
     // Show script
-    console.log('  [Command]\n');
-    var scriptContents = readScript(config.script, exit);
-    scriptContents.split('\n').forEach(function(line) {
-        console.log("  " + line);
-    });
+    console.log('[Command line]\n');
+    console.log(readScript(config.script, exit));
+    
+    console.log('[Logs]\n');
     
     // Run the demo
-    var p = proc.spawn('/bin/bash', [config.script]);
-
+    var p = proc.spawn('/bin/bash', [config.script], {
+        stdio: ['pipe', process.stdout, 'pipe']
+    });
+    
     // Deal with launch issues.
     p.on('error', (error) => {
         exit(1, "Failed to run demo: " + error.toString());
     });
 
-    // Print progress
-    var first = true;
-    function log(line) {
-        if (first) {
-            console.log('  [Progress logs]\n');
-            first = false;
-        }
-        if (re && !re.test(line)) {
-            // Skip lines that don't match regex
-            return;
-        }
-        //readline.cursorTo(process.stdout, 0);
-        process.stdout.write("  " + line + '\n');
-    }
-    lineReader.eachLine(p.stdout, log);
-    
     // Buffer stderr in case of an abnormal exit.
     var stderr = "";
     p.stderr.on('data', (data) => {
@@ -125,36 +136,24 @@ function doDemofileRun(file, exit) {
             exit(1, 'Demo exited unexpectedly: ' + stderr);
         }
         
-        console.log("");
-        console.log("  ---------------------------------------------------------------------");
-        console.log("  | For all data logged to stdout, see 'run.log'");
-        console.log("  ---------------------------------------------------------------------");
-        console.log("");
-        
-        console.log("  [Output files]\n");
+        console.log("[Output files]\n");
         config.output_files.forEach(function(output) {
-            console.log("  - " + output);
+            console.log("- " + output);
         });
         
         console.log("");
-        console.log("  ---------------------------------------------------------------------");
-        console.log("  | To learn more about the command-line options, test data,");
-        console.log("  | and output files, run 'demo run --help'");
-        console.log("  ---------------------------------------------------------------------");
+        console.log("---------------------------------------------------------------------");
+        console.log("| Run 'demo run --help' to learn more");
+        console.log("---------------------------------------------------------------------");
         console.log("");
     });
 }
 
-function assertHasDataForRun(data, exit) {
-    if (!data.run) {
-        exit(1, "Malformed Demofile: needs a [run] section");
+function defaultStr(isDefault) {
+    if (isDefault) {
+        return "(default)";
     }
-    if (!data.run.default) {
-        exit(1, "Malformed Demofile: needs a 'default' field under [run] section");
-    }
-    if (!data.run.preconfigured) {
-        exit(1, "Malformed Demofile: needs a 'preconfigured' field under [run] section");
-    }
+    return "";
 }
 
 function readScript(file, exit) {
