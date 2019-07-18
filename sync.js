@@ -10,14 +10,13 @@ const demo = require('./demo.js');
 // package.
 const cliSpec = [
     { name: 'dir', type: String, multiple: true, defaultOption: true },
-    { name: 'shared', type: Boolean },
     { name: 'complete', type: Boolean },
-    { name: 'verbose', alias: 'v', type: Boolean },
+    { name: 'verbose', alias: 'v', type: Boolean }
 ];
 
 const usageSpec = {
     title: 'Demo CLI - demo sync',
-    shortDescription: 'Rsync changes from /shared to /root',
+    shortDescription: 'Sync a directory in /shared to the demo',
     examples: [],
     formats: [
         'demo sync',
@@ -26,6 +25,8 @@ const usageSpec = {
     longDescription: ['This is a long description of demo sync'],
     notes: []
 };
+
+// TODO: implement dir
 
 function exec(args, exit) {
     'use strict';
@@ -41,35 +42,34 @@ function exec(args, exit) {
         exit(0, "Nothing to sync, no shared directory");
     }
 
-    // Directories to sync
     var verbose = args.hasOwnProperty('verbose') && args.verbose;
     var allowDelete = args.hasOwnProperty('complete') && args.complete;
-    var shared = args.hasOwnProperty('shared') && args.shared;
 
-    var dir = process.cwd();
-    var config = rsyncPaths(dir, shared, exit);
+    doRsync(process.cwd(), false /* shared */, allowDelete, verbose);
+}
 
-    // Do the rsync
+function doRsync(dir, shared, verbose, allowDelete, exit) {
+    // Parse the source, destination, and uid/gid
+    var config = rsyncConfig(dir, shared, exit);
+
+    // Do rsync
     var result = rsync(config.source,
                        config.destinationParent,
                        config.uid,
                        config.gid,
                        verbose,
                        allowDelete);
-    
-    console.log(result);
-    
+
+    // Handle errors
     if (result.error || result.status > 0) {
         exit(1, "Unexpected error syncing '" +
              src + "' to '" + dest + "': " + msgFailure(result));
     }
-    
-    exit(0);
 }
 
-function rsyncPaths(dir, toShared, exit) {
+function rsyncConfig(dir, share, exit) {
     // Sync from / to the /shared directory
-    if (toShared) {
+    if (share) {
         var stats = fs.statSync('/shared');
         return {
             source: dir,
@@ -119,8 +119,6 @@ function rsync(src, dest, uid, gid, verbose, allowDelete) {
         args.push('--delete');
     }
 
-    console.log("rsync " + args.join(' '));
-
     // Do rsync
     return proc.spawnSync('rsync', args);
 }
@@ -135,5 +133,6 @@ function msgFailure(result) {
 module.exports = {
     spec: cliSpec,
     usage: usageSpec,
-    exec: exec
+    exec: exec,
+    doRsync: doRsync
 };

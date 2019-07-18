@@ -1,6 +1,6 @@
-
-const proc = require('child_process');
 const fs = require('fs');
+const path = require('path');
+const proc = require('child_process');
 
 const demo = require('./demo.js');
 const toml = require('./toml.js');
@@ -35,29 +35,37 @@ function exec(args, exit) {
     // Check for image or demo file.
     var hasImage = args.hasOwnProperty('image');
     var hasDemofile = args.hasOwnProperty('demofile');
-    if (!hasImage && !hasDemofile) {
-        exit(1, "Run demo down --help, need a demo image or a demo file");
-    }
 
-    // Handle easy case first: configuration is already specified.
+    if (hasImage) {
+        exit(1, 'demo down <demo-image> not yet implemented');
+    }
+    
+    // Use the Demofile passed in
     if (hasDemofile) {
-        demofileDown(args, exit);
-        exit(0);
+        demofileDown(args.demofile, exit);
     }
+    // Look for a Demofile in the current directory
+    else {
+        if (!fs.existsSync('Demofile')) {
+            exit(1, "Run demo up --help, need a demo image or a demo file");
+        }
 
-    exit(1, "'demo down <demo-image>' not yet implemented");
+        // Use that one.
+        var file = path.join(process.cwd(), 'Demofile');
+        demofileDown(file, exit);
+    }
 }
 
-function demofileDown(args, exit) {
+function demofileDown(file, exit) {
     try {
-        doDemofileDown(args, exit);
+        doDemofileDown(file, exit);
     } catch (error) {
         exit(1, "'demo down' exited unexpected: " + error.toString());
     }    
 }
 
-function doDemofileDown(args, exit) {
-    var data = toml.parse(args.demofile, exit);
+function doDemofileDown(file, exit) {
+    var data = toml.parse(file, exit);
     assertHasDataForDown(data, exit);
 
     assertUp(data.docker.name, exit);

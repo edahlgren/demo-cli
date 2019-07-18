@@ -120,9 +120,11 @@ function doDemofileBuild(name, config, isDefault, exit) {
     
     console.log("");
     console.log("---------------------------------------------------------------------");
+    console.log("|");    
     console.log("| Building demo with the '" + name + "' configuration:");
     console.log("|");
-    console.log("|   " + config.description);
+    console.log("| - " + config.description);
+    console.log("|");    
     console.log("---------------------------------------------------------------------");
     console.log("");
 
@@ -152,21 +154,25 @@ function doDemofileBuild(name, config, isDefault, exit) {
     process.on('beforeExit', function(code) {
         if (code > 0) {
             console.log("");
-            console.log("|---------------------------------------------------------------------");
+            console.log("----------------------------------------------------------------------");
+            console.log("|");
             console.log("| Build failed");
             console.log("|");
             console.log("| To debug see the logs above or build.log");
-            console.log("|---------------------------------------------------------------------");
+            console.log("|");
+            console.log("----------------------------------------------------------------------");
             exit(1);
         }
         
         console.log("");
-        console.log("|---------------------------------------------------------------------");
-        console.log("| Build succeeded");
+        console.log("----------------------------------------------------------------------");
         console.log("|");
-        console.log("| Run 'demo run' to run the demo, or 'demo build --help' for more ways");
-        console.log("| to build the demo.");
-        console.log("| ---------------------------------------------------------------------");
+        console.log("| Build complete. Next:");
+        console.log("|");
+        console.log("| - Run 'demo run' to run the demo");
+        console.log("| - Run 'demo build --help' to learn about more ways to build");
+        console.log("|");
+        console.log("----------------------------------------------------------------------");
         console.log("");
     });
 }

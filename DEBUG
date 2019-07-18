@@ -1,3 +1,0 @@
-1. Copy the source into the shared directory of a running demo
-2. Run npm pack && npm install -g on the archive to install it
-3. Test it and iterate

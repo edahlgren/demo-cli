@@ -1,4 +1,3 @@
-
 const fs = require('fs');
 const path = require('path');
 
@@ -42,9 +41,10 @@ function exec(args, exit) {
     if (hasImage) {
         exit(1, 'demo up <demo-image> not yet implemented');
     }
+    
     // Use the Demofile passed in
-    else if (hasDemofile) {
-        demofileUp(args.demofile, exit);
+    if (hasDemofile) {
+        demofileUp(args.demofile, true /* assertNotUp */, exit);
     }
     // Look for a Demofile in the current directory
     else {
@@ -54,25 +54,31 @@ function exec(args, exit) {
 
         // Use that one.
         var file = path.join(process.cwd(), 'Demofile');
-        demofileUp(file, exit);
+        demofileUp(file, true /* assertNotUp */, exit);
     }
+
+    console.log("Demo is up, now run 'demo shell' to enter it");    
 }
 
-function demofileUp(file, exit) {
+function demofileUp(file, assertNotUp, exit) {
     try {
-        doDemofileUp(file, exit);
-        exit(0);
+        doDemofileUp(file, assertNotUp, exit);
     } catch (error) {
         exit(1, 'demo up exited unexpectedly: ' + error.toString());
     }
 }
 
-function doDemofileUp(file, exit) {
+function doDemofileUp(file, assertNotUp, exit) {
     var data = toml.parse(file, exit);
     assertHasDataForUp(data, exit);
-    
-    assertNotUp(data.docker.name, exit);
 
+    if (isUp(data.docker.name, exit)) {
+        if (assertNotUp) {
+            exit(0, "Demo is already up, run 'demo shell' to enter it");
+        }
+        return;
+    }
+        
     var hasSharedDirectory = data.up.shared_directory.length > 0;
     if (hasSharedDirectory) {
         assertDirectoryExists(data.up.shared_directory, exit);
@@ -103,8 +109,6 @@ function doDemofileUp(file, exit) {
     if (result.error || result.status > 0) {
         exit(1, msgFailure(result));
     }
-
-    console.log("Demo is up, now run 'demo shell' to enter it");
 }
 
 function assertHasDataForUp(data, exit) {
@@ -129,15 +133,13 @@ function assertHasDataForUp(data, exit) {
     }
 }
 
-function assertNotUp(containerName, exit) {
+function isUp(containerName, exit) {
     try {
         let result = docker.inspect(containerName);
         if (result == docker.CONTAINER_STOPPED) {
             exit(1, "Run 'docker rm " + containerName + "' to prevent a docker naming collision, use a different container_name in Demofile"); 
         }
-        if (result == docker.CONTAINER_RUNNING) {
-            exit(0, "Demo is already up, run 'demo shell' to enter it");
-        }
+        return (result == docker.CONTAINER_RUNNING);
     } catch (error) {
         console.error(error);
         exit(1, "Failed to use 'docker inspect' to run pre-checks, run with 'demo up --force' to skip pre-checks");
@@ -170,5 +172,6 @@ function msgFailure(result) {
 module.exports = {
     spec: cliSpec,
     usage: usageSpec,
-    exec: exec
+    exec: exec,
+    withDemofile: demofileUp
 };

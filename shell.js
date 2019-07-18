@@ -1,13 +1,17 @@
+const fs = require('fs');
+const path = require('path');
 
 const demo = require('./demo.js');
 const toml = require('./toml.js');
 const docker = require('./docker.js');
+const up = require('./up.js');
 
 // The CLI, using a spec compatible with the command-line-args
 // package.
 const cliSpec = [
     { name: 'image', defaultOption: true },
     { name: 'demofile', alias: 'f' },
+    { name: 'up', type: Boolean },
 ];
 
 const usageSpec = {
@@ -16,6 +20,7 @@ const usageSpec = {
     examples: [],
     formats: [
         'demo shell',
+        'demo shell --up',
         'demo shell <demo-image>',
         'demo shell -f <demo-file>'
     ],
@@ -31,34 +36,49 @@ function exec(args, exit) {
     if (demo.inside()) {
         exit(1, "Can't run 'demo shell' from within a demo shell");
     }
-    
+
     // Check for image or demo file.
     var hasImage = args.hasOwnProperty('image');
     var hasDemofile = args.hasOwnProperty('demofile');
-    if (!hasImage && !hasDemofile) {
-        exit(1, "Run demo shell --help, need a demo image or a demo file");
+    var needsUp = args.hasOwnProperty('up') && args.up;
+    
+    if (hasImage) {
+        exit(1, 'demo shell <demo-image> not yet implemented');
     }
 
-    // Handle easy case first: configuration is already specified.
+    // Use the Demofile passed in
     if (hasDemofile) {
-        demofileShell(args, exit);
-        exit(0);
+        if (needsUp) {
+            up.withDemofile(args.demofile, false /* assertNotUp */, exit);
+        }
+        demofileShell(args.demofile, exit);
     }
+    // Look for a Demofile in the current directory
+    else {
+        if (!fs.existsSync('Demofile')) {
+            exit(1, "Run demo up --help, need a demo image or a demo file");
+        }
 
-    exit(1, 'demo shell <demo-image> not yet implemented');
+        // Use that one.
+        var file = path.join(process.cwd(), 'Demofile');
+        if (needsUp) {
+            up.withDemofile(file, false /* assertNotUp */, exit);
+        }
+        demofileShell(file, exit);
+    }
 }
 
-function demofileShell(args, exit) {
+function demofileShell(file, exit) {
     try {
-        doDemofileShell(args, exit);
+        doDemofileShell(file, exit);
     } catch (error) {
         exit(1, 'demo up exited unexpectedly: ' + error.toString());
     }
 }
 
-function doDemofileShell(args, exit) {
+function doDemofileShell(file, exit) {
     // Parse Demofile
-    var data = toml.parse(args.demofile, exit);
+    var data = toml.parse(file, exit);
     assertHasDataForShell(data, exit);
 
     // Assert that the container is actually running

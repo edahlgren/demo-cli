@@ -1,41 +1,65 @@
-#### Launch a demo container:
+## On the Host
+
+#### Launch a demo container (Demofile in cwd)
 
 ```
-$ demo up -f ~/demo-mag-v1.1/ant-search/Demofile
+$ demo up
 ```
 
-#### Bring it down:
+#### Bring it down (Demofile in cwd)
 
 ```
-$ demo down -f ~/demo-mag-v1.1/ant-search/Demofile
+$ demo down
 ```
 
-#### Get shell access to a demo that's up:
+#### Get shell access to a demo that's up (Demofile in cwd)
 
 ```
-$ demo shell -f ~/demo-mag-v1.1/ant-search/Demofile
+$ demo shell
 ```
 
-#### Run the demo (in the shell)
+#### Get shell access to a demo that's not yet up (Demofile in cwd)
+
+```
+$ demo shell --up
+```
+
+#### Get shell access to a demo that needs to be restarted (Demofile in cwd)
+
+```
+$ demo shell --reup
+```
+
+## In the Demo
+
+#### Run the demo
 
 ```
 $ demo run
 ```
 
-#### Find the test data sets (in the shell)
+#### Find the source code and test data
 
 ```
-$ demo inspect data
+$ demo inspect
 ```
 
-#### Find the source code for the demo (in the shell)
-
-```
-$ demo inspect source
-```
-
-#### Rebuild the demo (in the shell)
+#### Force rebuild the demo
 
 ```
 $ demo build --clean
+```
+
+#### Access files in the demo via the shared directory on the host
+
+```
+$ cd DEMODIR
+$ demo share
+```
+
+#### Sync changes made in the shared directory back into the demo
+
+```
+$ cd DEMODIR
+$ demo sync
 ```

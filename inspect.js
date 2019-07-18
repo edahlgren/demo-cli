@@ -12,6 +12,7 @@ const usageSpec = {
     shortDescription: 'Inspect the source and test data (artifacts) of a demo',
     examples: [],
     formats: [
+        'demo inspect',
         'demo inspect source',
         'demo inspect data'
     ],
@@ -31,27 +32,28 @@ function exec(args, exit) {
     // TODO: implement --help
     // TODO: implement interactively choose inspect type
 
-    if (!args.hasOwnProperty('artifact')) {
-        exit(1, "Run 'demo inspect source' or 'demo inspect data'");
-    }
-
     switch (args.artifact) {
     case 'source':
         if (!fs.existsSync('/demo/Demofile.source')) {
             exit(1, "Can't run 'demo inspect source' without /demo/Demofile.source");
         }
         inspectSource('/demo/Demofile.source', exit);
-        exit(0);
+        break;
         
     case 'data':
         if (!fs.existsSync('/demo/Demofile.data')) {
             exit(1, "Can't run 'demo inspect data' without /demo/Demofile.data");
         }
         inspectData('/demo/Demofile.data', exit);
-        exit(0);
+        break;
         
     default:
-        exit(1, "Run 'demo inspect source' or 'demo inspect data'");
+        if (!fs.existsSync('/demo/Demofile.source') ||
+            !fs.existsSync('/demo/Demofile.data')) {
+            exit(1, "Can't run 'demo inspect' without /demo/Demofile.source and /demo/Demofile.data");
+        }
+        inspectSource('/demo/Demofile.source', exit);
+        inspectData('/demo/Demofile.data', exit);
     }
 }
 
@@ -70,7 +72,9 @@ function printSourceInfo(file, exit) {
     
     console.log("");
     console.log("-------------------------------------------------------------------------------");
+    console.log("|");    
     console.log("| Source code in this demo");
+    console.log("|");    
     console.log("-------------------------------------------------------------------------------");
     console.log("");
     
@@ -100,9 +104,6 @@ function assertHasDataForSource(data, exit) {
     if (!data.source) {
         exit(1, "Malformed Demofile: needs a [source] section");        
     }
-    if (!data.source.description) {
-        exit(1, "Malformed Demofile: needs a 'description' field under [source] section");        
-    }
     
     for (var key in data.source.preconfigured) {
         var repo = data.source.preconfigured[key];
@@ -117,6 +118,9 @@ function assertHasDataForSource(data, exit) {
         }
         if (!repo.dir) {
             exit(1, "Malformed Demofile: needs a 'dir' field under [source.preconfigured." + key + "] section");        
+        }
+        if (!repo.description) {
+            exit(1, "Malformed Demofile: needs a 'description' field under [source.preconfigured." + key + "] section");        
         }
     }
 
@@ -139,7 +143,9 @@ function printDataInfo(file, exit) {
 
     console.log("");
     console.log("-------------------------------------------------------------------------------");
+    console.log("|");    
     console.log("| Data sets in this demo");
+    console.log("|");    
     console.log("-------------------------------------------------------------------------------");
     console.log("");
     
@@ -147,26 +153,29 @@ function printDataInfo(file, exit) {
         var dataset = data.preconfigured[key];
         console.log("[" + key + "]");
         console.log("");
+        console.log("   (description) " + dataset.description);
+        console.log("   (source) " + dataset.source);
+        console.log("");
 
-        for (var subkey in dataset) {
+        for (var subkey in dataset.set) {
             if (subkey === 'extra') {
                 continue;
             }
             
-            var subset = dataset[subkey];
-            console.log("[" + subkey + "]");
+            var subset = dataset.set[subkey];
+            console.log("  [" + subkey + "]");
             console.log("");
         
-            console.log("   (files) " + subset.dir);
+            console.log("    (files) " + subset.dir);
             for (var i = 0; i < subset.files.length; i++) {
-                console.log("       " + subset.files[i] + " - " + subset.file_descriptions[i]);
+                console.log("      " + subset.files[i] + " - " + subset.file_descriptions[i]);
             }
             console.log("");
 
             subset.extra.forEach(function(field) {
                 var desc = dataset.extra[field];
                 var value = subset[field];
-                console.log("   (" + desc + ") " + value);
+                console.log("    (" + desc + ") " + value);
             });
             console.log("");
         }
@@ -178,11 +187,20 @@ function assertHasDataForData(data, exit) {
     if (!data.data) {
         exit(1, "Malformed Demofile: needs a [data] section");
     }
-    if (!data.data.description) {
-        exit(1, "Malformed Demofile: needs a 'description' field under [data] section");
-    }
     if (!data.data.preconfigured) {
         exit(1, "Malformed Demofile: needs a 'preconfigured' field under [data] section");
+    }
+    for (var key in data.data.preconfigured) {
+        var repo = data.data.preconfigured[key];
+        if (!repo.description) {
+            exit(1, "Malformed Demofile: needs a 'description' field under [data.preconfigured." + key + "] section");
+        }
+        if (!repo.source) {
+            exit(1, "Malformed Demofile: needs a 'source' field under [data.preconfigured." + key + "] section");
+        }
+        if (!repo.set) {
+            exit(1, "Malformed Demofile: needs a 'set' field under [data.preconfigured." + key + "] section");
+        }
     }
 
     // TODO: iterate through the preconfigured datasets

@@ -98,7 +98,9 @@ function doDemofileRun(name, config, isDefault, exit) {
 
     console.log("");
     console.log("---------------------------------------------------------------------");
+    console.log("|");    
     console.log("| Running demo with the '" + name + "' configuration " + defaultStr(isDefault));
+    console.log("|");    
     console.log("---------------------------------------------------------------------");
     console.log("");
     
@@ -143,7 +145,12 @@ function doDemofileRun(name, config, isDefault, exit) {
         
         console.log("");
         console.log("---------------------------------------------------------------------");
-        console.log("| Run 'demo run --help' to learn more");
+        console.log("|");
+        console.log("| Run complete. Next:");
+        console.log("|");
+        console.log("| - Run 'demo inspect source' to find the source code");
+        console.log("| - Run 'demo run --help' to learn about more ways to run");
+        console.log("|");
         console.log("---------------------------------------------------------------------");
         console.log("");
     });
