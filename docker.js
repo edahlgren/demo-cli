@@ -67,10 +67,8 @@ function dockerRun(config) {
     // Add image name
     args.push(config.image);
 
-    console.log('docker ' + args);
-    
     // Finally run the command
-    return proc.spawnSync("docker", args, { stdio: 'inherit' });
+    return proc.spawnSync("docker", args);
 }
 
 function dockerKill(config) {

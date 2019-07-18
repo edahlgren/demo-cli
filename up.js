@@ -38,29 +38,37 @@ function exec(args, exit) {
     // Check for at least one valid configuration.
     var hasImage = args.hasOwnProperty('image');
     var hasDemofile = args.hasOwnProperty('demofile');
-    if (!hasImage && !hasDemofile) {
-        exit(1, "Run demo up --help, need a demo image or a demo file");
-    }
-    
-    // Handle easy case first: configuration is already specified.
-    if (hasDemofile) {
-        demofileUp(args, exit);
-        exit(0);
-    }
 
-    exit(1, 'demo up <demo-image> not yet implemented');
+    if (hasImage) {
+        exit(1, 'demo up <demo-image> not yet implemented');
+    }
+    // Use the Demofile passed in
+    else if (hasDemofile) {
+        demofileUp(args.demofile, exit);
+    }
+    // Look for a Demofile in the current directory
+    else {
+        if (!fs.existsSync('Demofile')) {
+            exit(1, "Run demo up --help, need a demo image or a demo file");
+        }
+
+        // Use that one.
+        var file = path.join(process.cwd(), 'Demofile');
+        demofileUp(file, exit);
+    }
 }
 
-function demofileUp(args, exit) {
+function demofileUp(file, exit) {
     try {
-        doDemofileUp(args, exit);
+        doDemofileUp(file, exit);
+        exit(0);
     } catch (error) {
         exit(1, 'demo up exited unexpectedly: ' + error.toString());
     }
 }
 
-function doDemofileUp(args, exit) {
-    var data = toml.parse(args.demofile, exit);
+function doDemofileUp(file, exit) {
+    var data = toml.parse(file, exit);
     assertHasDataForUp(data, exit);
     
     assertNotUp(data.docker.name, exit);
@@ -95,7 +103,7 @@ function doDemofileUp(args, exit) {
     if (result.error || result.status > 0) {
         exit(1, msgFailure(result));
     }
-    
+
     console.log("Demo is up, now run 'demo shell' to enter it");
 }
 

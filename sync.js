@@ -2,14 +2,17 @@
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+const proc = require('child_process');
+
 const demo = require('./demo.js');
 
 // The CLI, using a spec compatible with the command-line-args
 // package.
 const cliSpec = [
     { name: 'dir', type: String, multiple: true, defaultOption: true },
+    { name: 'shared', type: Boolean },
+    { name: 'complete', type: Boolean },
     { name: 'verbose', alias: 'v', type: Boolean },
-    { name: 'delete', alias: 'd', type: Boolean }
 ];
 
 const usageSpec = {
@@ -39,48 +42,57 @@ function exec(args, exit) {
     }
 
     // Directories to sync
-    var dirs = [];
     var verbose = args.hasOwnProperty('verbose') && args.verbose;
-    var allowDelete = args.hasOwnProperty('delete') && args.delete;
+    var allowDelete = args.hasOwnProperty('complete') && args.complete;
+    var shared = args.hasOwnProperty('shared') && args.shared;
 
-    // No dirs given
-    if (args.dirs.length == 0) {
-        // Get all directories under /shared
-        dirs = fs.readdirSync('/shared');
-        if (dirs.length == 0) {
-            exit(0, "Nothing to sync, shared directory is empty");
-        }
-    } else {
-        // Check that the given directories exist
-        args.dirs.forEach(function(dir) {
-            var fullpath = path.join('/shared', dir);
-            if (!fs.existsSync(dir)) {
-                exit(1, "Can't sync directory '" + dir + "' because it doesn't exist");
-            }
-        });
-        dirs = args.dirs;
-    }
+    var dir = process.cwd();
+    var config = rsyncPaths(dir, shared, exit);
 
-    // Run rsync
-    for (var i = 0; i < dirs.length; i++) {
-        var src = path.join('/shared', dirs[i]);
-        var dest = path.join('/root', dirs[i]);
-        
-        var result = rsync(src, dest, verbose, allowDelete);
-        if (result.error || result.status > 0) {
-            console.log("Unexpected error syncing '" +
-                        src + "' to '" + dest + "': " + msgFailure(result));
-            exit(1, "Failed to completely sync");
-        }
-        
-        var progress = util.format('[%d/%d] %s -> %s', i+1, dirs.length, src, dest);
-        console.log(progress);
+    // Do the rsync
+    var result = rsync(config.source,
+                       config.destinationParent,
+                       config.uid,
+                       config.gid,
+                       verbose,
+                       allowDelete);
+    
+    console.log(result);
+    
+    if (result.error || result.status > 0) {
+        exit(1, "Unexpected error syncing '" +
+             src + "' to '" + dest + "': " + msgFailure(result));
     }
     
     exit(0);
 }
 
-function rsync(src, dest, verbose, allowDelete) {
+function rsyncPaths(dir, toShared, exit) {
+    // Sync from / to the /shared directory
+    if (toShared) {
+        var stats = fs.statSync('/shared');
+        return {
+            source: dir,
+            destinationParent: path.join('/shared', path.dirname(dir)),
+            uid: stats.uid,
+            gid: stats.gid
+        };
+    }
+
+    // Sync from /shared back to /
+    var src = path.join('/shared', dir);
+    if (!fs.existsSync(src)) {
+        exit(1, "Cannot sync from '" + src + "' because it doesn't exist");
+    }
+    return {
+        source: src,
+        destinationParent: path.dirname(dir),
+        uid: 0,
+        gid: 0
+    };
+}
+
+function rsync(src, dest, uid, gid, verbose, allowDelete) {
     var args = [];
 
     // Recursively
@@ -106,6 +118,8 @@ function rsync(src, dest, verbose, allowDelete) {
     if (allowDelete) {
         args.push('--delete');
     }
+
+    console.log("rsync " + args.join(' '));
 
     // Do rsync
     return proc.spawnSync('rsync', args);

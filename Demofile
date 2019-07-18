@@ -1,0 +1,10 @@
+
+demo = "dm/ant-colony-search"
+
+[docker]
+name = "dm.ant-colony-search"
+image = "ant-colony-test"
+
+[up]
+shared_directory = "shared"
+http_port = 4454

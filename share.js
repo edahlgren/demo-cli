@@ -14,10 +14,10 @@ const cliSpec = [
 
 const usageSpec = {
     title: 'Demo CLI - demo share',
-    shortDescription: 'Copy directories from /root to /shared',
+    shortDescription: 'Copy a directory to /shared',
     examples: [],
     formats: [
-        'demo share src',
+        'demo share .',
     ],
     options: [],
     longDescription: ['This is a long description of demo share'],
@@ -40,15 +40,22 @@ function exec(args, exit) {
     if (!fs.existsSync('/shared')) {
         exit(1, "Can't run 'demo share' unless a directory is shared with this demo, run 'demo up --help' to learn how to configure this.");
     }
+    
     var stats = fs.statSync('/shared');
-
-    var dirs = [];
     var uid = stats.uid;
     var gid = stats.gid;
+    
     var overwrite = args.hasOwnProperty('overwrite') && args.overwrite;
 
+    // Just implement sharing the current working directory (no args)
+    // TODO: pass a set of directories in to filter what you're sharing
+
+    var cwd = process.cwd();
+    console.log(args);
+    
     // No dirs given
-    if (args.dirs.length == 0) {
+    var hasDirs = args.hasOwnProperty('dir');
+    if (!hasDirs || args.dir.length == 0) {
         // Get all directories under /root
         //
         // Prompt to make sure that the user wants this, because
@@ -59,24 +66,24 @@ function exec(args, exit) {
         }
     } else {
         // Check that the given directories exist
-        args.dirs.forEach(function(dir) {
+        args.dir.forEach(function(dir) {
             var fullpath = path.join('/root', dir);
             if (!fs.existsSync(dir)) {
                 exit(1, "Can't share directory '" + dir + "' because it doesn't exist");
             }
         });
-        dirs = args.dirs;
+        dirs = args.dir;
     }
 
     // Copy to share
     for (var i = 0; i < dirs.length; i++) {
         var src = path.join('/root', dirs[i]);
         var dest = path.join('/shared', dirs[i]);
-                
-        copyDir(src, dest, overwrite, uid, gid, exit);
-        
+
         var progress = util.format('[%d/%d] %s -> %s', i+1, dirs.length, src, dest);
         console.log(progress);
+                
+        copyDir(src, dest, overwrite, uid, gid, exit);
     }
 
     exit(0);
@@ -92,8 +99,11 @@ function copyDir(src, dest, overwrite, uid, gid, exit) {
         exit(1, "'" + dest + "' already exists. Run 'demo share' with '--overwrite' to overwrite it.");
     }
 
+    console.log("src: " + src);
+    console.log("dest: " + dest);
+
     // Find the lowest subdirectory that doesn't yet exist.
-    var first = findFirstMissingDir(dest);
+    var first = findFirstMissingDir('/shared', dest);
     if (first.length == 0) {
         if (!overwrite) {
             exit(1, "BUG can't find a path doesn't exist, despite confirming that '" + dest + "' doesn't exist");

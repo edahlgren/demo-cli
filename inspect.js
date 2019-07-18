@@ -69,29 +69,28 @@ function printSourceInfo(file, exit) {
     var source = data.source;
     
     console.log("");
-    console.log("  -------------------------------------------------------------------------------");
-    console.log("  | Source code in this demo                                                    |");
-    console.log("  -------------------------------------------------------------------------------");
+    console.log("-------------------------------------------------------------------------------");
+    console.log("| Source code in this demo");
+    console.log("-------------------------------------------------------------------------------");
     console.log("");
     
-    console.log("  " + source.description);
-    console.log("");
     
     for (var key in source.preconfigured) {
         var repo = source.preconfigured[key];
         
-        console.log("  [" + key + "]");
+        console.log("[" + key + "]");
+        console.log("");
+
+        console.log("  (description) " + repo.description);
+        console.log("  (authors) " + repo.authors.join(', '));
+        console.log("  (version) " + repo.version);
+        console.log("  (license) " + repo.license);
         console.log("");
         
-        console.log("    (authors) " + repo.authors.join(', '));
-        console.log("    (version) " + repo.version);
-        console.log("    (license) " + repo.license);
-        console.log("");
-        
-        console.log("    (files) " + repo.dir);
+        console.log("  (files) " + repo.dir);
         for (var n in repo.notable_files) {
             var notable = repo.notable_files[n];
-            console.log("      " + notable.file + " - " + notable.description);
+            console.log("    " + notable.file + " - " + notable.description);
         }
         console.log("");
     }
@@ -139,35 +138,39 @@ function printDataInfo(file, exit) {
     data = data.data;
 
     console.log("");
-    console.log("  -------------------------------------------------------------------------------");
-    console.log("  | Data sets in this demo                                                      |");
-    console.log("  -------------------------------------------------------------------------------");
+    console.log("-------------------------------------------------------------------------------");
+    console.log("| Data sets in this demo");
+    console.log("-------------------------------------------------------------------------------");
     console.log("");
     
-    console.log("  " + data.description);
-    console.log("");
-
-    var num = 1;
     for (var key in data.preconfigured) {
         var dataset = data.preconfigured[key];
-        console.log("  [" + key + "]");
+        console.log("[" + key + "]");
         console.log("");
 
-        dataset.extra.forEach(function(field) {
-            var desc = data.extra[field];
-            var value = dataset[field];
-            console.log("     (" + desc + ") " + value);
-        });
-        console.log("");
+        for (var subkey in dataset) {
+            if (subkey === 'extra') {
+                continue;
+            }
+            
+            var subset = dataset[subkey];
+            console.log("[" + subkey + "]");
+            console.log("");
         
-        console.log("     (files) " + dataset.dir);
-        for (var i = 0; i < dataset.files.length; i++) {
-            console.log("       " + dataset.files[i] + " - " + dataset.file_descriptions[i]);
-        }
-        console.log("");
-        num += 1;
-    }
+            console.log("   (files) " + subset.dir);
+            for (var i = 0; i < subset.files.length; i++) {
+                console.log("       " + subset.files[i] + " - " + subset.file_descriptions[i]);
+            }
+            console.log("");
 
+            subset.extra.forEach(function(field) {
+                var desc = dataset.extra[field];
+                var value = subset[field];
+                console.log("   (" + desc + ") " + value);
+            });
+            console.log("");
+        }
+    }
     console.log("");
 }
 
