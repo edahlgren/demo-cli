@@ -93,10 +93,11 @@ function main() {
         var helpArgs = cli(help.spec, { argv });
         help.exec(helpArgs, exit);
         break;
-
-    case 'up':
-        var upArgs = cli(up.spec, { argv });
-        up.exec(upArgs, exit);
+        
+    case 'shell':
+        // Does this throw an error?
+        var shellArgs = cli(shell.spec, { argv });
+        shell.exec(shellArgs, exit);
         break;
         
     case 'down':
@@ -104,12 +105,6 @@ function main() {
         down.exec(downArgs, exit);
         break;
         
-    case 'shell':
-        // Does this throw an error?
-        var shellArgs = cli(shell.spec, { argv });
-        shell.exec(shellArgs, exit);
-        break;
-
     case 'run':
         // Does this throw an error?
         var runArgs = cli(run.spec, { argv });
