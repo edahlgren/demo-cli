@@ -1,20 +1,23 @@
 const fs = require('fs');
+const yaml = require('js-yaml');
+
 const path = require('path');
 const stdin = require('readline-sync');
 
 const demo = require('./demo.js');
-const toml = require('./toml.js');
 const docker = require('./docker.js');
 const pull = require('./pull.js');
 const up = require('./up.js');
 
-// The CLI, using a spec compatible with the command-line-args
-// package.
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 const cliSpec = [
     { name: 'image', defaultOption: true },
     { name: 'demofile', alias: 'f' },
     { name: 'yes', alias: 'y', type: Boolean },
-    { name: 'quiet', type: Boolean },
+    { name: 'quiet', alias: 'q', type: Boolean },
 ];
 
 const usageSpec = {
@@ -32,114 +35,215 @@ const usageSpec = {
     notes: []
 };
 
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 function exec(args, exit) {
     'use strict';
+
     
     // This command doesn't work inside a demo shell
     if (demo.inside()) {
         exit(1, "Can't run 'demo shell' from within a demo shell");
     }
 
-    // Parse the command args
-    var hasImage = args.hasOwnProperty('image');
-    var hasDemofile = args.hasOwnProperty('demofile');
-    var skipConfirmation = args.hasOwnProperty('yes') && args.yes;
-    var quiet = args.hasOwnProperty('quiet') && args.quiet;
     
-    if (quiet) {
-        skipConfirmation = true;
-    }
+    // Parse the configuration from the arguments
+    var config = getConfig(args, exit);
+    if (!config.ok)
+        exit(1, config.error_msg);
+
     
-    var image = (hasImage ? args.image : '');
-    var demofile = (hasDemofile ? args.demofile
-                    : path.join(process.cwd(), 'Demofile'));
-
-    if (hasImage) {
-        exit(1, 'demo shell <demo-image> not yet implemented');
-    }
-    if (!fs.existsSync(demofile)) {
-        exit(1, "Need a demo file, run demo shell --help to learn more");
-    }
-
-    // Actually execute the command.
-    try {
-        var config = shellConfiguration({
-            file: demofile,
-            image: image,
-        });
-        config.quiet = quiet;
-        config.skipConfirmation = skipConfirmation;
-        
-        doShell(config);
-    } catch (error) {
-        exit(1, "---------\n'demo shell' exited unexpectedly:\n\n" + error.toString());
-    }
+    // Execute 'demo shell'
+    var result = execShell(config);
+    if (!result.ok)
+        exit(1, "---------\n" +
+             "'demo shell' exited unexpectedly:\n\n" + result.error_msg);
 }
 
-function shellConfiguration(config) {
-    var data = toml.parse(config.file);
-    if (!data.shell) {
-        throw new Error("Demofile needs a [shell] section");
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+function getConfig(args) {
+    
+    // Parse the command args
+    var hasImage = args.hasOwnProperty('image');
+    var Demofile = (args.hasOwnProperty('demofile') ? args.demofile
+                    : path.join(process.cwd(), 'demo.yml'));
+
+    var quiet = args.hasOwnProperty('quiet') && args.quiet;    
+    var skipConfirmation = quiet || (args.hasOwnProperty('yes') && args.yes);
+
+    
+    // Check for the things we don't implement yet
+    if (hasImage) {
+        return {
+            ok: false,
+            error_msg: 'demo shell <demo-image> not yet implemented'
+        };
     }
-    if (!data.shell.image) {
-        throw new Error(1, "Demofile needs an 'image' field under [shell] section");
+    if (!fs.existsSync(Demofile)) {
+        return {
+            ok: false,
+            error_msg: "Need a demo file, run demo shell --help to learn more"
+        };
     }
-    if (!data.shell.container_name) {
-        throw new Error("Demofile needs a 'name' field under [shell] section");
+
+    
+    // Parse the shell configuration from the demofile
+    var file_result = parseDemofile(Demofile);
+    if (!file_result.ok) {
+        return {
+            ok: false,
+            error_msg: "Failed to parse " + Demofile + ": " + file_result.msg
+        };
     }
-    if (!data.shell.shared_directory) {
-        throw new Error(1, "Demofile needs a 'shared_directory' field under [shell] section");
-    }
+
+    
+    // Return the config
     return {
-        dockerImage: data.shell.image,
-        containerName: data.shell.container_name,
-        sharedDir: data.shell.shared_directory
+        ok: true,
+        
+        image: file_result.image,
+        instance: file_result.instance,
+        shared_directory: file_result.shared_directory,
+        
+        skipConfirmation: skipConfirmation,
+        quiet: quiet
     };
 }
 
-function doShell(config) {    
-    if (!config.quiet) {
-        if (!config.skipConfirmation) {
-            // Do a dry run
-            console.log("Executing dry run ...");
-            console.log("");
-            printDryRun(config);
-            
-            if (!stdin.keyInYN("Do you want to continue?")) {
-                return;
-            }
-            console.log("\n---------");
-        }
+function parseDemofile(file) {
+    var data = {};
+    try {
+        data = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
+    } catch (e) {
+        return {
+            ok: false,
+            msg: "failed to read " + file + " as YAML: " + e.toString()
+        };
     }
+    
+    function withHelp(msg) {
+        return msg + " Run 'demo configure shell --check to learn more";
+    }
+    
+    function isString(value) {
+        return (typeof value === 'string' || value instanceof String);
+    }
+    
+    if (!data.image)
+        return {
+            ok: false,
+            msg: withHelp("Your Demofile needs an 'image' field.")
+        };
 
-    // Ensure that the docker image is pulled
-    pull.ensure({
-        quiet: config.quiet,
-        dockerImage: config.dockerImage
-    });
+    if (!isString(data.image))
+        return {
+            ok: false,
+            msg: withHelp("In your Demofile, the value of 'image' must be a string.")
+        };
 
-    // Ensure that the demo is running in the background
-    up.ensure({
-        quiet: config.quiet,
-        sharedDir: config.sharedDir,
-        containerName: config.containerName,
-        dockerImage: config.dockerImage
-    });
+    if (data.instance && !isString(data.instance))
+        return {
+            ok: false,
+            msg: withHelp("In your Demofile, the value of 'instance' must be a string.")
+        };
 
-    // Enter the shell
-    enterShell({
-        quiet: config.quiet,
-        containerName: config.containerName
-    });
+    if (data.shared_directory && !isString(data.shared_directory))
+        return {
+            ok: false,
+            msg: withHelp("In your Demofile, the value of 'shared_directory' must be a string and a file path.")
+        };
+
+    var instance_base = data.image.replace('.', '-');
+    return {
+        ok: true,
+        image: data.image,
+        instance: (data.instance ? instance_base + "." + data.instance
+                   : instance_base),
+        shared_directory: (data.shared_directory ? data.shared_directory : '')
+    };
 }
 
-function printDryRun(config) {
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+function execShell(config) {
+    // Do a dry run if necessary
+    if (!config.skipConfirmation) {
+        var stop = execDryRun(config);
+        if (stop)
+            return { ok: true };
+    }
+
+    // Ensure that the docker image is pulled down
+    try {
+        pull.ensure({
+            quiet: config.quiet,
+            dockerImage: config.image
+        });
+    } catch (e) {
+        return {
+            ok: false,
+            error_msg: "failed to download the demo: " + e.toString()
+        };
+    }
+
+    // Ensure that the demo is up and running in the background
+    try {
+        up.ensure({
+            quiet: config.quiet,
+            dockerImage: config.image,
+            containerName: config.instance,
+            sharedDir: config.shared_directory
+        });
+    } catch (e) {
+        return {
+            ok: false,
+            error_msg: "failed to launch the demo: " + e.toString()
+        };
+    }
+
+    // Enter the shell
+    try {
+        enterShell({
+            quiet: config.quiet,
+            containerName: config.instance
+        });
+    } catch (e) {
+        return {
+            ok: false,
+            error_msg: "failed to attach to the demo: " + e.toString()
+        };
+    }
+
+    return { ok: true };
+}
+
+function execDryRun(config) {
+    console.log("Executing dry run ...");
+    console.log("");
+    doDryRun(config);
+            
+    if (!stdin.keyInYN("Do you want to continue?")) {
+        return true;
+    }
+    
+    console.log("\n---------");
+    return false;
+}
+
+function doDryRun(config) {
     var steps = [];
     var alreadyDone = [];
     
     var pullSteps = pull.ensure({
         dryRun: true,
-        dockerImage: config.dockerImage
+        dockerImage: config.image
     });
     steps = steps.concat(pullSteps);
     if (pullSteps.length == 0) {
@@ -149,9 +253,9 @@ function printDryRun(config) {
     // Get the steps for ensuring the demo is up.
     var upSteps = up.ensure({
         dryRun: true,
-        sharedDir: config.sharedDir,
-        containerName: config.containerName,
-        dockerImage: config.dockerImage
+        dockerImage: config.image,
+        containerName: config.instance,
+        sharedDir: config.shared_directory
     });
     steps = steps.concat(upSteps);
     if (upSteps.length == 0) {
@@ -160,12 +264,12 @@ function printDryRun(config) {
     
     var shellSteps = enterShell({
         dryRun: true,
-        containerName: config.containerName
+        containerName: config.instance
     });
     steps = steps.concat(shellSteps);
 
-    if (fs.existsSync(up.makeAbsolute(config.sharedDir))) {
-        console.log("The directory '" + up.makeAbsolute(config.sharedDir) + "':");
+    if (fs.existsSync(up.makeAbsolute(config.shared_directory))) {
+        console.log("The directory '" + up.makeAbsolute(config.shared_directory) + "':");
         console.log("");
         console.log("  - Already exists and its contents will be visible inside the demo");
         console.log("");
@@ -197,10 +301,6 @@ function printDryRun(config) {
 
 function enterShell(config) {
     if (config.dryRun) {
-        let commandLine = docker.execBash({
-            dryRun: true,
-            containerName: config.containerName
-        });
         return [[
             "Run 'docker exec' to attach this terminal to the demo"
         ]];
@@ -214,6 +314,10 @@ function enterShell(config) {
     
     docker.execBash({containerName: config.containerName});
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+
 
 module.exports = {
     spec: cliSpec,

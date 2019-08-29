@@ -1,0 +1,12 @@
+# demo.yml: data for entering and shutting down a demo
+
+# Name of the image. Required.
+image: ant-colony-test
+
+# Use a previously launched demo instance, or mark this
+# instance for use later. Can be omitted.
+instance: experiment1
+
+# Directory to share with the demo, synced inside the demo
+# at /shared. Can be omitted.
+shared_directory: ./shared
