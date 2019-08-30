@@ -1,11 +1,14 @@
 const stdin = require('readline-sync');
 const fs = require('fs');
 
+const pull = require('../../util/pull.js');
+const up = require('../../util/up.js');
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
 function confirmSteps(config) {
+    console.log("");
     console.log("Executing dry run ...");
     console.log("");
     doDryRun(config);
@@ -19,7 +22,8 @@ function confirmSteps(config) {
 }
 
 function doDryRun(config) {
-    var steps = [];
+    var dirStatus = [];
+    var todo = [];
     var done = [];
 
     //
@@ -28,41 +32,58 @@ function doDryRun(config) {
 
     [pullSteps, upSteps, execSteps].forEach(function(stepFn) {
         var _steps = stepFn(config);
-        if (_steps.length == 0)
-            done.push(_steps.done_msg);
-        else
-            steps = steps.concat(_steps.steps);
+        if (_steps.hasOwnProperty("dirStatus"))
+            dirStatus.push(_steps.dirStatus);
+
+        todo = todo.concat(_steps.todo);
+        done = done.concat(_steps.done);
     });
 
     //
-    // Print things that are already done
+    // Assert that we got the minimum info we need
     //
     
-    var shared_directory = up.makeAbsolute(config.shared_directory);
-    if (fs.existsSync(shared_directory)) {
-        printDirExists(shared_directory);
+    if (dirStatus.length == 0 || todo.length == 0) {
+        console.log("BUG!!");
+        process.exit(1);
     }
     
+    //
+    // Print the steps that are already done
+    //
+    
     if (done.length > 0) {
-        console.log("The demo is already:");
+        console.log("  The demo is already:");
         console.log("");
         done.forEach(function(status) {
-            console.log("  - " + status);
+            console.log("    - " + status);
         });
         console.log("");
     }
 
     //
+    // Print the status of the shared directory
+    //
+    
+    var absolute_dir = up.makeAbsolute(config.shared_directory);
+    console.log("  The directory '" + absolute_dir + "':");
+    console.log("");
+    dirStatus.forEach(function(status) {
+        console.log("    - " + status);
+    });
+    console.log("");
+    
+    //
     // Print the steps that need to happen
     //
     
-    console.log("This command will:");
+    console.log("  This command will:");
     console.log("");
-    steps.forEach(function(group) {
+    todo.forEach(function(group) {
         for (let i = 0; i < group.length; i++) {
-            let indent = "  - ";
+            let indent = "    - ";
             if (i > 0)
-                indent = "    - ";
+                indent = "      - ";
             
             console.log(indent + group[i]);
         }
@@ -71,35 +92,28 @@ function doDryRun(config) {
 }
 
 function pullSteps(config) {
-    var steps = pull.ensure({
+    return pull.ensure({
         dryRun: true,
         dockerImage: config.image
     });
-
-    return {
-        steps: steps,
-        done_msg: "Downloaded, skipping 'docker pull'"
-    };
 }
 
 function upSteps(config) {
-    var steps = up.ensure({
+    return up.ensure({
         dryRun: true,
         dockerImage: config.image,
         containerName: config.instance,
         sharedDir: config.shared_directory
     });
-
-    return {
-        steps: steps,
-        done_msg: "Up, skipping 'docker run'"
-    };
 }
 
 function execSteps(config) {
+    var absolute_dir = up.makeAbsolute(config.shared_directory);
     return {
-        steps: [["Run 'docker exec' to attach this terminal to the demo"]],
-        done_msg: ""
+        todo: [
+            ["Run 'docker exec' to attach this terminal to the demo"]
+        ],
+        done: []
     };
 }
 

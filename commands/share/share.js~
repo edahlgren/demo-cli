@@ -3,8 +3,9 @@ const fs = require('fs');
 const fsExtra = require('fs-extra');
 const path = require('path');
 const util = require('util');
-const demo = require('./demo.js');
-const sync = require('./sync.js');
+
+const demo = require('../../util/demo.js');
+const sync = require('../commands/sync/sync.js');
 
 // The CLI, using a spec compatible with the command-line-args
 // package.

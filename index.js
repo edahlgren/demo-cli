@@ -3,15 +3,13 @@
 const cli = require('command-line-args');
 
 // Commands
-const help = require('./help');
-const up = require('./up');
-const down = require('./down');
-const shell = require('./shell');
-const run = require('./run');
-const build = require('./build');
-const inspect = require('./inspect');
-const share = require('./share');
-const sync = require('./sync');
+const help = require('./commands/help/help');
+const shell = require('./commands/shell/shell');
+const down = require('./commands/down/down');
+const run = require('./commands/run/run');
+const build = require('./commands/build/build');
+const share = require('./commands/share/share');
+const sync = require('./commands/sync/sync');
 
 const cliSpec = [
     { name: 'help', alias: 'h', type: Boolean },
@@ -115,12 +113,6 @@ function main() {
         // Does this throw an error?
         var buildArgs = cli(build.spec, { argv });
         build.exec(buildArgs, exit);
-        break;
-
-    case 'inspect':
-        // Does this throw an error?
-        var inspectArgs = cli(inspect.spec, { argv });
-        inspect.exec(inspectArgs, exit);
         break;
 
     case 'share':

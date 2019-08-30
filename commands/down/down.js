@@ -2,10 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const proc = require('child_process');
 
-const demo = require('./demo.js');
-const toml = require('./toml.js');
-const docker = require('./docker.js');
-const up = require('./up.js');
+const demo = require('../../util/demo.js');
+const docker = require('../../util/docker.js');
+const up = require('../../util/up.js');
 
 const cliSpec = [
     { name: 'image', defaultOption: true },
@@ -39,7 +38,7 @@ function exec(args, exit) {
 
     var image = (hasImage ? args.image : '');
     var demofile = (hasDemofile ? args.demofile
-                    : path.join(process.cwd(), 'Demofile'));
+                    : path.join(process.cwd(), 'demo.yml'));
     
     if (hasImage) {
         exit(1, 'demo down <demo-image> not yet implemented');
