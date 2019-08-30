@@ -1,5 +1,6 @@
 const fs = require('fs');
-const demo = require('../../util/demo.js');
+
+const demofile = require('../../util/demofile.js');
 const sync = require('../sync/sync.js');
 
 
@@ -10,7 +11,7 @@ function exec(args, exit) {
     'use strict';
     
     // This command doesn't work outside of a demo shell
-    if (!demo.inside()) {
+    if (!demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo share' from outside of a demo shell");
     }
 

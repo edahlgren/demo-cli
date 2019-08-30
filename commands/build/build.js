@@ -1,7 +1,7 @@
 const fs = require('fs');
 const proc = require('child_process');
 
-const demo = require('../../util/demo.js');
+const demofile = require('../../util/demofile.js');
 const fileutil = require('../../util/file.js');
 const cli = require('./cli.js');
 
@@ -20,7 +20,7 @@ function exec(args, exit) {
     'use strict';
     
     // This command doesn't work outside of a demo shell
-    if (!demo.inside()) {
+    if (!demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo bulid' from outside of a demo shell");
     }
     

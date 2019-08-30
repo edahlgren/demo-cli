@@ -1,8 +1,9 @@
 const fs = require('fs');
 const proc = require('child_process');
 
-const demo = require('../../util/demo.js');
+const demofile = require('../../util/demofile.js');
 const cli = require('./cli.js');
+const makeDocs = require('./make.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -13,7 +14,7 @@ function exec(args, exit) {
 
     
     // This command doesn't work inside a demo shell
-    if (!demo.inside()) {
+    if (!demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo docs' from outside of a demo shell");
     }
 
@@ -44,10 +45,6 @@ function exec(args, exit) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-function makeDocs() {
-    return { ok: true };
-}
 
 function asyncLess(file, exit) {
     if (!fs.existsSync(file))
@@ -87,5 +84,6 @@ function asyncLess(file, exit) {
 
 module.exports = {
     spec: cli.spec,
-    exec: exec
+    exec: exec,
+    asyncLess: asyncLess
 };

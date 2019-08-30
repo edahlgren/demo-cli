@@ -5,6 +5,10 @@ const yaml = require('js-yaml');
 ////////////////////////////////////////////////////////////////////////////////
 
 
+function isInsideDemo() {
+    return fs.existsSync('/demo/demo.yml');
+}
+
 function parseDemofile(file, checks) {
     var data = {};
     try {
@@ -53,6 +57,7 @@ function getInstance(image, instance) {
 
 
 module.exports = {
+    isInsideDemo: isInsideDemo,
     parse: parseDemofile,
     getInstance: getInstance
 };

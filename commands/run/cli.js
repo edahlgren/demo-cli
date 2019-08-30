@@ -1,5 +1,5 @@
 const fs = require('fs');
-const demofile = require('../../util/demofile');
+const demofile = require('../../util/demofile.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -18,15 +18,6 @@ function parseConfig(args) {
 
     // Parse the command args
     var useDefault = !args.hasOwnProperty('config');
-
-
-    // Check that the demo file exists
-    if (!fs.existsSync('/demo/demo.yml')) {
-        return {
-            ok: false,
-            error_msg: "Can't run 'demo run' without /demo/demo.yml"
-        };
-    }
 
 
     // Parse and check the contents of the Demofile

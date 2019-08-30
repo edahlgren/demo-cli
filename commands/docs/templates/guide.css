@@ -1,0 +1,61 @@
+body {
+    background-color: #fff;
+    margin: 0 auto;
+    padding: 0;
+    font-family: 'Source Code Pro', sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    letter-spacing: .25px;
+    color: #242424;
+    text-align: left;
+    line-height: 25px !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-size: 16px;
+    font-family: 'Source Code Pro', monospace;
+    margin: 0px;
+    margin-top: 36px;
+    font-weight: bold;
+}
+
+p, ul, ol {
+    margin: 0px;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+p {
+  margin-top: 8px;
+}
+
+a {
+    text-decoration: underline;
+    color: #242424;
+}
+
+.guide {
+    width: 90%;
+    max-width: 600px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+p {
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+pre {
+    background-color: #f6f8fa;
+    border: none;
+    padding: 16px;
+    overflow: auto;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 12.5px;
+    font-weight: 400;
+    letter-spacing: 0px;
+    color: #242424;
+    line-height: 1.7 !important;
+}

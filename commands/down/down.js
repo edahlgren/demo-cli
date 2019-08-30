@@ -1,4 +1,4 @@
-const demo = require('../../util/demo.js');
+const demofile = require('../../util/demofile.js');
 const docker = require('../../util/docker.js');
 const up = require('../../util/up.js');
 const cli = require('./cli.js');
@@ -11,7 +11,7 @@ function exec(args, exit) {
     'use strict';
 
     // This command doesn't work inside a demo shell
-    if (demo.inside()) {
+    if (demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo down' from within a demo shell");
     }
 

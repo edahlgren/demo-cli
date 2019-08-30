@@ -1,6 +1,6 @@
 const path = require('path');
 
-const demo = require('../../util/demo.js');
+const demofile = require('../../util/demofile.js');
 const docker = require('../../util/docker.js');
 const pull = require('../../util/pull.js');
 const up = require('../../util/up.js');
@@ -17,7 +17,7 @@ function exec(args, exit) {
 
     
     // This command doesn't work inside a demo shell
-    if (demo.inside()) {
+    if (demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo shell' from within a demo shell");
     }
 
