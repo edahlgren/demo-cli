@@ -68,7 +68,7 @@ function getConfig(dir, toShared) {
             
             // From /{dir} to /shared/{dir}
             source: dir,
-            destinationParent: path.join('/shared', path.dirname(dir)),
+            destParent: path.join('/shared', path.dirname(dir)),
 
             // Use the UID/GID of the mounted directory at /shared
             // so someone outside of the demo can access and delete
@@ -94,7 +94,7 @@ function getConfig(dir, toShared) {
 
         // From /shared/{dir} to /{dir}
         source: src,
-        destinationParent: path.dirname(dir),
+        destParent: path.dirname(dir),
 
         // Use the root UID/GID to match the user inside the demo
         uid: 0,
@@ -109,9 +109,8 @@ function spawnRsync(src, dest, uid, gid, verbose, allowDelete) {
     args.push('-a');
 
     // Verbosely
-    if (verbose) {
+    if (verbose)
         args.push('-v');
-    }
     
     // Chown files and directories at destination
     // to this owner
@@ -135,7 +134,11 @@ function spawnRsync(src, dest, uid, gid, verbose, allowDelete) {
         return { ok: false, error_msg: result.error.toString() };
     if (result.status > 0)
         return { ok: false, error_msg: result.stderr.toString() };
-    
+
+    // Print stdout if verbose
+    if (verbose)
+        console.log(result.stdout.toString());
+        
     return { ok: true };
 }
 
@@ -145,6 +148,7 @@ function spawnRsync(src, dest, uid, gid, verbose, allowDelete) {
 
 module.exports = {
     spec: cli.spec,
+    parse: cli.parse,
     exec: exec,
     rsync: rsync
 };

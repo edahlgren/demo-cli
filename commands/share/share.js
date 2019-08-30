@@ -11,7 +11,7 @@ function exec(args, exit) {
     
     // This command doesn't work outside of a demo shell
     if (!demo.inside()) {
-        exit(1, "Can't run 'demo sync' from outside of a demo shell");
+        exit(1, "Can't run 'demo share' from outside of a demo shell");
     }
 
     
@@ -27,11 +27,11 @@ function exec(args, exit) {
     //   allowDelete:       Whether to remove files at the destination
     //   directory:         The directory to share
     //
-    var config = sync.cli.parse(args, exit);
+    var config = sync.parse(args, exit);
     if (!config.ok)
         exit(1, config.error_msg);
-    
 
+    
     // Rsync the directory to /shared
     var result = sync.rsync(config, true /* shared */);
     if (!result.ok)
@@ -43,6 +43,6 @@ function exec(args, exit) {
 
 
 module.exports = {
-    spec: sync.cli.spec,
+    spec: sync.spec,
     exec: exec
 };
