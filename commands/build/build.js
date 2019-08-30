@@ -3,9 +3,7 @@ const proc = require('child_process');
 
 const demo = require('../../util/demo.js');
 const fileutil = require('../../util/file.js');
-
 const cli = require('./cli.js');
-const usage = require('./usage.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +150,5 @@ function printFooter(error) {
 
 module.exports = {
     spec: cli.spec,
-    usage: usage.spec,
     exec: exec
 };

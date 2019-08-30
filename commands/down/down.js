@@ -1,9 +1,7 @@
 const demo = require('../../util/demo.js');
 const docker = require('../../util/docker.js');
 const up = require('../../util/up.js');
-
 const cli = require('./cli.js');
-const usage = require('./usage.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,6 +57,5 @@ function execDown(config) {
 
 module.exports = {
     spec: cli.spec,
-    usage: usage.spec,
     exec: exec
 };

@@ -6,7 +6,6 @@ const pull = require('../../util/pull.js');
 const up = require('../../util/up.js');
 
 const cli = require('./cli.js');
-const usage = require('./usage.js');
 const dry_run = require('./dry-run.js');
 
 
@@ -39,8 +38,7 @@ function exec(args, exit) {
     // Execute 'demo shell'
     var result = execShell(config);
     if (!result.ok)
-        exit(1, "---------\n" +
-             "'demo shell' exited unexpectedly:\n\n" + result.error_msg);
+        exit(1, result.error_msg);
 }
 
 
@@ -115,6 +113,5 @@ function enterShell(config) {
 
 module.exports = {
     spec: cli.spec,
-    usage: usage.spec,
     exec: exec
 };

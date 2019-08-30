@@ -1,32 +1,14 @@
-
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const proc = require('child_process');
 
 const demo = require('../../util/demo.js');
+const cli = require('./cli.js');
 
-// The CLI, using a spec compatible with the command-line-args
-// package.
-const cliSpec = [
-    { name: 'dir', type: String, multiple: true, defaultOption: true },
-    { name: 'complete', type: Boolean },
-    { name: 'verbose', alias: 'v', type: Boolean }
-];
 
-const usageSpec = {
-    title: 'Demo CLI - demo sync',
-    shortDescription: 'Sync a directory in /shared to the demo',
-    examples: [],
-    formats: [
-        'demo sync',
-    ],
-    options: [],
-    longDescription: ['This is a long description of demo sync'],
-    notes: []
-};
+////////////////////////////////////////////////////////////////////////////////
 
-// TODO: implement dir
 
 function exec(args, exit) {
     'use strict';
@@ -36,63 +18,91 @@ function exec(args, exit) {
         exit(1, "Can't run 'demo sync' from outside of a demo shell");
     }
 
-    // Is there even a shared directory in the first place? We put
-    // it in a standard place so it's easy to find.
+    
+    // Check that there's a shared directory to share files with.
     if (!fs.existsSync('/shared')) {
         exit(0, "Nothing to sync, no shared directory");
     }
 
-    var verbose = args.hasOwnProperty('verbose') && args.verbose;
-    var allowDelete = args.hasOwnProperty('complete') && args.complete;
+    
+    // Parse the configuration from the command-line arguments
+    //
+    //   verbose:           Whether to show rsync logs
+    //   allowDelete:       Whether to remove files at the destination
+    //   directory:         The directory to share
+    //
+    var config = cli.parse(args, exit);
+    if (!config.ok)
+        exit(1, config.error_msg);
 
-    doRsync(process.cwd(), false /* shared */, allowDelete, verbose);
+
+    // Rsync a directory from /shared to config.directory
+    var result = rsync(config, false /* shared */);
+    if (!result.ok)
+        exit(1, result.error_msg);        
 }
 
-function doRsync(dir, shared, verbose, allowDelete, exit) {
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+function rsync(config, toShared) {
     // Parse the source, destination, and uid/gid
-    var config = rsyncConfig(dir, shared, exit);
-
-    // Do rsync
-    var result = rsync(config.source,
-                       config.destinationParent,
-                       config.uid,
-                       config.gid,
-                       verbose,
-                       allowDelete);
-
-    // Handle errors
-    if (result.error || result.status > 0) {
-        exit(1, "Unexpected error syncing '" +
-             src + "' to '" + dest + "': " + msgFailure(result));
-    }
+    var rconfig = getConfig(config.directory, toShared);
+    if (!rconfig.ok)
+        return rconfig;
+    
+    // Spawn the rsync process
+    return spawnRsync(rconfig.source, rconfig.destParent,
+                      rconfig.uid, rconfig.gid,
+                      config.verbose, config.allowDelete);
+    
 }
 
-function rsyncConfig(dir, share, exit) {
-    // Sync from / to the /shared directory
-    if (share) {
+function getConfig(dir, toShared) {
+    // Sync from dir to /shared
+    if (toShared) {
         var stats = fs.statSync('/shared');
         return {
+            ok: true,
+            
+            // From /{dir} to /shared/{dir}
             source: dir,
             destinationParent: path.join('/shared', path.dirname(dir)),
+
+            // Use the UID/GID of the mounted directory at /shared
+            // so someone outside of the demo can access and delete
+            // the files freely
             uid: stats.uid,
             gid: stats.gid
         };
     }
 
-    // Sync from /shared back to /
+    // Can't sync from a directory that doesn't exist. Consider failing
+    // gracefully instead of with an error
     var src = path.join('/shared', dir);
     if (!fs.existsSync(src)) {
-        exit(1, "Cannot sync from '" + src + "' because it doesn't exist");
+        return {
+            ok: false,
+            error_msg: "Cannot sync from '" + src + "' because it doesn't exist"
+        };
     }
+    
+    // Sync from /shared to dir
     return {
+        ok: true,
+
+        // From /shared/{dir} to /{dir}
         source: src,
         destinationParent: path.dirname(dir),
+
+        // Use the root UID/GID to match the user inside the demo
         uid: 0,
         gid: 0
     };
 }
 
-function rsync(src, dest, uid, gid, verbose, allowDelete) {
+function spawnRsync(src, dest, uid, gid, verbose, allowDelete) {
     var args = [];
 
     // Recursively
@@ -120,19 +130,21 @@ function rsync(src, dest, uid, gid, verbose, allowDelete) {
     }
 
     // Do rsync
-    return proc.spawnSync('rsync', args);
+    var result = proc.spawnSync('rsync', args);
+    if (result.error)
+        return { ok: false, error_msg: result.error.toString() };
+    if (result.status > 0)
+        return { ok: false, error_msg: result.stderr.toString() };
+    
+    return { ok: true };
 }
 
-function msgFailure(result) {
-    if (result.error) {
-        return result.error.toString();
-    }
-    return result.stderr.toString();
-}
+
+////////////////////////////////////////////////////////////////////////////////
+
 
 module.exports = {
-    spec: cliSpec,
-    usage: usageSpec,
+    spec: cli.spec,
     exec: exec,
-    doRsync: doRsync
+    rsync: rsync
 };

@@ -1,33 +1,10 @@
-
 const fs = require('fs');
-const fsExtra = require('fs-extra');
-const path = require('path');
-const util = require('util');
-
 const demo = require('../../util/demo.js');
 const sync = require('../sync/sync.js');
 
-// The CLI, using a spec compatible with the command-line-args
-// package.
-const cliSpec = [
-    { name: 'dir', type: String, multiple: true, defaultOption: true },
-    { name: 'complete', type: Boolean },
-    { name: 'verbose', alias: 'v', type: Boolean }
-];
 
-const usageSpec = {
-    title: 'Demo CLI - demo share',
-    shortDescription: 'Sync a directory in the demo to /shared',
-    examples: [],
-    formats: [
-        'demo share',
-    ],
-    options: [],
-    longDescription: ['This is a long description of demo share'],
-    notes: []
-};
+////////////////////////////////////////////////////////////////////////////////
 
-// TODO: implement dir
 
 function exec(args, exit) {
     'use strict';
@@ -37,20 +14,35 @@ function exec(args, exit) {
         exit(1, "Can't run 'demo sync' from outside of a demo shell");
     }
 
-    // Is there even a shared directory in the first place? We put
-    // it in a standard place so it's easy to find.
+    
+    // Check that there's a shared directory to share files with.
     if (!fs.existsSync('/shared')) {
-        exit(0, "Nothing to sync, no shared directory");
+        exit(0, "Nothing to share, no shared directory");
     }
 
-    var verbose = args.hasOwnProperty('verbose') && args.verbose;
-    var allowDelete = args.hasOwnProperty('complete') && args.complete;
+    
+    // Parse the configuration from the command-line arguments
+    //
+    //   verbose:           Whether to show rsync logs
+    //   allowDelete:       Whether to remove files at the destination
+    //   directory:         The directory to share
+    //
+    var config = sync.cli.parse(args, exit);
+    if (!config.ok)
+        exit(1, config.error_msg);
+    
 
-    sync.doRsync(process.cwd(), true /* shared */, allowDelete, verbose);
+    // Rsync the directory to /shared
+    var result = sync.rsync(config, true /* shared */);
+    if (!result.ok)
+        exit(1, result.error_msg);        
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 module.exports = {
-    spec: cliSpec,
-    usage: usageSpec,
+    spec: sync.cli.spec,
     exec: exec
 };
