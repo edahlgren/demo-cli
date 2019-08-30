@@ -84,7 +84,8 @@ const checks = [
     // Check for run configs
     {
         exec: function(data) {
-            return data.run.configs && data.run.configs.length == 0;
+            return data.run.configs &&
+                data.run.configs.length > 0;
         },
         issue: "at least one 'run' config is required"
     }

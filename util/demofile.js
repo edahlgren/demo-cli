@@ -26,14 +26,16 @@ function parseDemofile(file, checks) {
         return message.length > 0;
     });
 
-    if (issues.length == 0)
-        return { ok: true, data: data };
+    if (issues.length == 0) {
+        data.ok = true;
+        return data;
+    }
 
     var error_msg = "Some issues were found while parsing '" + file + "':\n";
     issues.forEach(function(issue) {
         error_msg += "  - " + issue + "\n";
     });
-    error_msg += "Run 'demo configure --check to learn more";
+    error_msg += "Run 'demo configure --check' to learn more";
 
     return {
         ok: false,

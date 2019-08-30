@@ -1,7 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-const proc = require('child_process');
-
 const demo = require('../../util/demo.js');
 const docker = require('../../util/docker.js');
 const up = require('../../util/up.js');
@@ -51,7 +47,10 @@ function execDown(config) {
     });
 
     console.log("");
-    console.log("Demo is down. Relaunch a fresh container by running 'demo shell'");
+    console.log("Demo is down. Relaunch a fresh container by running 'demo shell'.");
+    console.log("");
+
+    return { ok: true };
 }
 
 

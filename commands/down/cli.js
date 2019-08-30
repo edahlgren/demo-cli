@@ -73,7 +73,9 @@ const checks = [
     // if it's provided
     {
         exec: function(data) {
-            return data.instance && !type.isString(data.instance);
+            if (data.instance)
+                return type.isString(data.instance);
+            return true;
         },
         issue: "the value of 'instance' must be a string"
     }

@@ -98,7 +98,8 @@ const checks = [
     // Check for build configs
     {
         exec: function(data) {
-            return data.build.configs && data.build.configs.length == 0;
+            return data.build.configs &&
+                data.build.configs.length > 0;
         },
         issue: "at least one 'build' config is required"
     }
