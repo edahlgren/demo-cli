@@ -1,5 +1,5 @@
 const fs = require('fs');
-const yaml = require('js-yaml');
+const demofile = require('../../util/demofile');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,13 @@ const cli = [
 
 
 function parseConfig(args) {
+
+    // Parse the command args
+    var useDefault = !args.hasOwnProperty('config');
+    var needsClean = args.hasOwnProperty('clean') && args.clean;
+    
+
+    // Check that the demo file exists
     if (!fs.existsSync('/demo/demo.yml')) {
         return {
             ok: false,
@@ -23,68 +30,34 @@ function parseConfig(args) {
         };
     }
     
-    var useDefault = !args.hasOwnProperty('config');
-    var needsClean = args.hasOwnProperty('clean') && args.clean;
+
+    // Parse and check the contents of the Demofile
+    var data = demofile.parse('/demo/demo.yml', checks);
+    if (!data.ok)
+        return data;
+
     
-    return parseDemofile('/demo/demo.yml',
-                         useDefault, args.config, needsClean);
-}
-
-function parseDemofile(file, useDefault, config_name, needsClean) {
-    var data = {};
-    try {
-        data = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
-    } catch (e) {
-        return {
-            ok: false,
-            msg: "failed to read " + file + " as YAML: " + e.toString()
-        };
-    }
-
-    function withHelp(msg) {
-        return msg + " Run 'demo configure build --check to learn more";
-    }
-    
-    if (!data.build)
-        return {
-            ok: false,
-            msg: withHelp("/demo/demo.yml needs a 'run' section.")
-        };
-
-    if (needsClean && !data.build.clean)
-        return {
-            ok: false,
-            msg: withHelp("/demo/demo.yml needs a 'clean' field under 'build'")
-        };
-
-    if (!data.build.configs || data.build.configs.length == 0)
-        return {
-            ok: false,
-            msg: withHelp("/demo/demo.yml doesn't have 'configs' under 'build'.")
-        };
-
+    // Parse the default config
     if (useDefault) {
         return {
-            ok: true,
-
+            ok: true,            
             needsClean: needsClean,
             cleanScript: data.build.clean,
-            
             name: data.build.configs[0].name,
             isDefault: true,
             script: data.build.configs[0].script
         };
     }
 
+    
+    // Parse any other config
     for (var i = 0; i < data.build.configs.length; i++) {
         var config = data.build.configs[i];
-        if (config.name == config_name) {
+        if (config.name == args.config) {
             return {
                 ok: true,
-                
                 needsClean: needsClean,
                 cleanScript: data.build.clean,
-                
                 name: data.build.configs[i].name,
                 isDefault: (i == 0),
                 script: data.build.configs[i].script
@@ -92,15 +65,44 @@ function parseDemofile(file, useDefault, config_name, needsClean) {
         }
     }
 
+
+    // Handle config names we can't find
     var names = data.build.configs.map(function(config) {
         return config.name;
     });
     return {
         ok: false,
-        error_msg: "can't find '" + config_name + "' in /demo/demo.yml. Defined configs:"
+        error_msg: "can't find '" + args.config
+            + "' in /demo/demo.yml. Defined configs:"
             + " [ " + names.join(', ') + " ] ?"
     };
 }
+
+const checks = [
+    // Check for the build section
+    {
+        exec: function(data) {
+            return data.build;
+        },
+        issue: "the 'build' section is required"
+    },
+    
+    // Check that a clean script exists
+    {
+        exec: function(data) {
+            return data.build.clean;
+        },
+        issue: "a 'build' clean script is required"
+    },
+    
+    // Check for build configs
+    {
+        exec: function(data) {
+            return data.build.configs && data.build.configs.length == 0;
+        },
+        issue: "at least one 'build' config is required"
+    }
+];
 
 
 ////////////////////////////////////////////////////////////////////////////////

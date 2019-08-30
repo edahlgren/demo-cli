@@ -1,0 +1,47 @@
+const fs = require('fs');
+const yaml = require('js-yaml');
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+const cliSpec = [
+    { name: 'image', defaultOption: true },
+    { name: 'demofile', alias: 'f' },
+];
+
+
+    // Parse the command args
+    var hasImage = args.hasOwnProperty('image');
+    var hasDemofile = args.hasOwnProperty('demofile');
+
+    var image = (hasImage ? args.image : '');
+    var demofile = (hasDemofile ? args.demofile
+                    : path.join(process.cwd(), 'demo.yml'));
+    
+    if (hasImage) {
+        exit(1, 'demo down <demo-image> not yet implemented');
+    }
+    if (!fs.existsSync(demofile)) {
+        exit(1, "Need a demo file, run demo down --help to learn more");
+    }
+
+    // Actually execute the command.
+    try {
+        var config = downConfiguration({
+            file: demofile,
+            image: image
+        });
+        
+function downConfiguration(config) {
+    var data = toml.parse(config.file);
+    if (!data.shell) {
+        throw new Error("Demofile needs a [shell] section");
+    }
+    if (!data.shell.container_name) {
+        throw new Error("Demofile needs a 'name' field under [shell] section");
+    }
+    return {
+        containerName: data.shell.container_name
+    };    
+}

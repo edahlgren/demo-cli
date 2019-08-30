@@ -1,5 +1,5 @@
 const fs = require('fs');
-const yaml = require('js-yaml');
+const demofile = require('../../util/demofile');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,6 +15,12 @@ const cli = [
 
 
 function parseConfig(args) {
+
+    // Parse the command args
+    var useDefault = !args.hasOwnProperty('config');
+
+
+    // Check that the demo file exists
     if (!fs.existsSync('/demo/demo.yml')) {
         return {
             ok: false,
@@ -22,51 +28,28 @@ function parseConfig(args) {
         };
     }
 
-    var useDefault = !args.hasOwnProperty('config');
-    return parseDemofile('/demo/demo.yml',
-                         useDefault, args.config);
-}
 
-function parseDemofile(file, useDefault, config_name) {
-    var data = {};
-    try {
-        data = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
-    } catch (e) {
-        return {
-            ok: false,
-            msg: "failed to read " + file + " as YAML: " + e.toString()
-        };
-    }
+    // Parse and check the contents of the Demofile
+    var data = demofile.parse('/demo/demo.yml', checks);
+    if (!data.ok)
+        return data;
 
-    function withHelp(msg) {
-        return msg + " Run 'demo configure run --check to learn more";
-    }
-    
-    if (!data.run)
-        return {
-            ok: false,
-            msg: withHelp("/demo/demo.yml needs a 'run' section.")
-        };
 
-    if (!data.run.configs || data.run.configs.length == 0)
-        return {
-            ok: false,
-            msg: withHelp("/demo/demo.yml doesn't have 'configs' under 'run'.")
-        };
-
+    // Parse the default config
     if (useDefault) {
         return {
-            ok: true,
-            
+            ok: true,            
             name: data.run.configs[0].name,
             isDefault: true,
             script: data.run.configs[0].script
         };
     }
 
+    
+    // Parse any other config
     for (var i = 0; i < data.run.configs.length; i++) {
         var config = data.run.configs[i];
-        if (config.name == config_name) {
+        if (config.name == args.config) {
             return {
                 ok: true,
                 name: data.run.configs[i].name,
@@ -76,15 +59,36 @@ function parseDemofile(file, useDefault, config_name) {
         }
     }
 
+
+    // Handle config names we can't find
     var names = data.run.configs.map(function(config) {
         return config.name;
     });
     return {
         ok: false,
-        error_msg: "can't find '" + config_name + "' in /demo/demo.yml. Defined configs:"
+        error_msg: "can't find '" + args.config
+            + "' in /demo/demo.yml. Defined configs:"
             + " [ " + names.join(', ') + " ] ?"
     };
 }
+
+const checks = [
+    // Check for the run section
+    {
+        exec: function(data) {
+            return data.run;
+        },
+        issue: "the 'run' section is required"
+    },
+    
+    // Check for run configs
+    {
+        exec: function(data) {
+            return data.run.configs && data.run.configs.length == 0;
+        },
+        issue: "at least one 'run' config is required"
+    }
+];
 
 
 ////////////////////////////////////////////////////////////////////////////////
