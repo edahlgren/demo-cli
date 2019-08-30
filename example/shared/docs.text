@@ -1,0 +1,86 @@
+                                                            type 'q' to exit
+                                                            scroll to view all
+
+  (docs help) - Ant Colony Search
+
+
+  Find and generate documentation about this demo
+
+
+  Quick reference
+  ===============
+
+    Show this guide
+
+      $ demo docs
+      
+    Re-generate the help guides in /docs/help
+
+      $ demo docs --make
+      
+
+  Summary
+  =======
+
+    The 'demo docs' command prints a map of all documentation in this
+    demo. See 'Overview' below.
+
+    The 'demo docs --make' command uses a Demofile to create markdown
+    guides, which then are converted to plain text and html for easy
+    viewing.
+
+    Input
+    
+      /demo/Demofile
+      /demo/docs/templates/*.md
+      /demo/docs/templates/*.html
+    
+    Output
+    
+      /docs/help/*.txt
+      /docs/help/*.html
+    
+
+  Overview
+  ========
+
+                                         (description)
+    
+    Source docs
+    
+      /docs/src/acotsp/README            High-level description of the acotsp code and 
+                                         its usage
+    
+    Research papers
+    
+      /docs/papers/AntSystem.pdf         Basic Ant System, Elitist Ant System
+      /docs/papers/RankBased.pdf         Rank-based Ant System
+      /docs/papers/AntColonySystem.pdf   Ant Colony System
+      /docs/papers/BestWorst.pdf         Best-worst Ant System
+    
+    Demo command guides
+    
+      /docs/guides/help.txt              'demo --help'
+      /docs/guides/run.txt               'demo run --help'
+      /docs/guides/build.txt             'demo build --help'
+      /docs/guides/share-sync.txt        'demo share --help'
+                                         'demo sync --help'
+    
+    File guides
+    
+      /docs/guides/docs.txt              'demo docs'
+      /docs/guides/data.txt              'demo data'
+      /docs/guides/source.txt            'demo source'
+    
+
+  Help
+  ====
+
+    View this guide
+
+      $ demo docs
+      
+    Same as above
+
+      $ demo docs --help
+      

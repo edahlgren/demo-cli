@@ -4,12 +4,15 @@ const cli = require('command-line-args');
 
 // Commands
 const help = require('./commands/help/help');
+
 const shell = require('./commands/shell/shell');
 const down = require('./commands/down/down');
+
 const run = require('./commands/run/run');
 const build = require('./commands/build/build');
 const share = require('./commands/share/share');
 const sync = require('./commands/sync/sync');
+const docs = require('./commands/docs/docs');
 
 const cliSpec = [
     { name: 'help', alias: 'h', type: Boolean },
@@ -125,6 +128,12 @@ function main() {
         // Does this throw an error?
         var syncArgs = cli(sync.spec, { argv });
         sync.exec(syncArgs, exit);
+        break;
+        
+    case 'docs':
+        // Does this throw an error?
+        var docsArgs = cli(docs.spec, { argv });
+        docs.exec(docsArgs, exit);
         break;
         
     default:
