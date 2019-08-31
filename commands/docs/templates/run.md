@@ -1,4 +1,4 @@
-# (run help) - {{title}}
+# (run help) - 
 
 Execute the main binaries and scripts of this demo
 
@@ -25,16 +25,16 @@ $ cat run.error
 
 ## Summary
 
-{{run.description}}
+{{description}}
 
 |              |                 |
 | -----------  | --------------- |
 | ___Input     |                 |
-{{#input}}
+{{#input_files}}
 | {{format}}   | {{description}} |
 {{/input}}
 | ___Output    |                 | 
-{{#output}}
+{{#output_files}}
 | {{format}}   | {{description}} |
 {{/output}}
 
@@ -59,47 +59,42 @@ $ demo run -- [options...]
 ```
 
 ## Configured runs
-{{#run.preconfigured}}
+{{#configs}}
 
 {{description}}
 
 ```
 $ demo run {{name}}
 ```
-{{/run.preconfigured}}
+{{/configs}}
 
 ## Command-line options
 
 |                 |             |                   |
 | --------------- | ----------- | ----------------- |
 |                 | (default)   | (description)     |
-|___Input         |             |                   |
-{{#input}}
+|___Choose one    |             |                   |
+{{#args_choose}}
+| ({{description}}) |           |                   |
+{{#choices}}
 | {{options}}     | {{default}} | {{description}}   |
-{{/input}}
-|___Output        |             |                   |
-{{#output}}
+{{/choices}}
+{{/args_choose}}
+|___Choose any    |             |                   |
+{{#args_any}}
 | {{options}}     | {{default}} | {{description}}   |
-{{/output}}
-|___Algorithms    |             |                   |
-{{#algorithms}}
-| {{options}}     | {{default}} | {{description}}   |
-{{/algorithms}}
-|___Parameters    |             |                   |
-{{#params}}
-| {{options}}     | {{default}} | {{description}}   |
-{{/params}}
+{{/args_any}}
 
 
 ## Examples
-{{#run.examples}}
+{{#examples}}
 
 {{description}}
 
 ```
 $ demo run -- {{&commandline}}
 ```
-{{/run.examples}}
+{{/examples}}
 
 ## Help
 
@@ -127,6 +122,6 @@ $ less /docs/src/README
 
 |           |              |
 | --------- | ------------ |
-{{#run.preconfigured}}
+{{#configs}}
 | {{name}}  | {{script}}   |
-{{/run.preconfigured}}
+{{/configs}}

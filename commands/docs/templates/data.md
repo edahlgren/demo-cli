@@ -1,4 +1,4 @@
-# (data) - {{title}}
+# (data) -
 
 Test data included in this demo
 

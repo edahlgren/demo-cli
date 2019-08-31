@@ -12,7 +12,7 @@ function readContent(file) {
     }
     return {
         ok: true,
-        contents: contents
+        content: contents
     };
 }
 
@@ -25,9 +25,7 @@ function writeContent(file, content) {
             error_msg: "couldn't write file '" + file + "': " + error.toString()
         };
     }
-    return {
-        ok: true
-    };
+    return { ok: true };
 }
 
 function readdir(dir) {
@@ -40,10 +38,7 @@ function readdir(dir) {
             error_msg: "couldn't read directory '" + dir + "': " + error.toString()
         };
     }
-    return {
-        ok: true,
-        paths: paths
-    };
+    return { ok: true, paths: paths };
 }
 
 module.exports = {

@@ -1,4 +1,4 @@
-# (build help) - {{title}}
+# (build help) - 
 
 Build the main source code of this demo
 
@@ -23,22 +23,13 @@ $ cat build.log
 $ cat build.error
 ```
 
-## Summary
+## Files
 
-|           |              |
-| --------- | ------------ |
-| ___Uses build files  |              |
-{{#source.preconfigured}}
+|                |                 |
+| -------------- | --------------- |
 {{#build_files}}
-| ({{name}})  | {{file}}     |
+| ({{file}})     | {{description}} |
 {{/build_files}}
-{{/source.preconfigured}}
-| ___Produces build artifacts |              |
-{{#source.preconfigured}}
-{{#build_artifacts}}
-| ({{name}})  | {{file}}     |
-{{/build_artifacts}}
-{{/source.preconfigured}}
 
 ## Ways to build
 
@@ -56,13 +47,13 @@ $ demo build <configuration> --dryrun
 
 ## Configured builds
 
-{{#build.preconfigured}}
+{{#configs}}
 {{description}}
 
 ```
 $ demo build {{name}}
 ```
-{{/build.preconfigured}}
+{{/configs}}
 
 ## Help
 
@@ -84,6 +75,6 @@ $ less /docs/src/README
 
 |           |              |
 | --------- | ------------ |
-{{#build.preconfigured}}
+{{#configs}}
 | {{name}}  | {{script}}   |
-{{/build.preconfigured}}
+{{/configs}}

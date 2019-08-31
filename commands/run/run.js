@@ -93,7 +93,7 @@ function printHeader(config) {
     console.log("");
 
     console.log('[Command line]\n');
-    console.log(result.contents);
+    console.log(result.content);
     
     return { ok: true };
 }

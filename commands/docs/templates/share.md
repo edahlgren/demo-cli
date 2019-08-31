@@ -1,6 +1,6 @@
-# (share|sync help) - {{title}}
+# (share help) -
 
-Make a directory accessible in a shared directory outside this demo, and sync any changes you made there to the same directory in the demo
+Rsync a directory inside the demo to a local directory
 
 ## Quick reference
 

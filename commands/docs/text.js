@@ -27,18 +27,17 @@ function textFromHTML(html, options) {
     } catch (error) {
         return {
             ok: false,
-            error_msg: error.toString()
+            error_msg: error.toString() + "\n" + error.stack
         };
     }
 
-    return text;
+    return { ok: true, text: text };
 }
 
 
-// This should probably be in a template
+// FIXME: put in a template
 function lessGuide() {
-    var buffer = empty.repeat(60) + "This doc is displayed by 'less':";
-    buffer += empty.repeat(60) + "type 'q' to exit\n";
+    var buffer = empty.repeat(60) + "type 'q' to exit\n";
     buffer += empty.repeat(60) + "type '/' to search\n";
     buffer += empty.repeat(60) + "Type down arrow to scroll\n";
     return buffer;
@@ -54,7 +53,7 @@ function renderText(html, options) {
         
         baseElement: options.baseElement,
         wordwrap: options.wordwrap,
-        unorderedListItemPrefix: options.listPrefix,
+        unorderedListItemPrefix: options.unorderedListItemPrefix,
         
         // Parse all tables
         tables: true,
@@ -163,36 +162,47 @@ function formatHeading(elem, fn, options) {
 }
 
 
-function formatParagraph(elem, fn, options) {
-    let text = fn(elem.children, options);
-    let lines = text.split('\n');
-    let _indent = formatIndent(false);
-    
-    if (isCode(elem, options))
-        _indent += '  ';
-
-    text = '';
-    lines.forEach(function(line) {
-        text += _indent + line + '\n';
-    });
-    
-    if (!isCode(elem, options))
-        text += '\n';
-    
-    return text;
-}
-
-
 function isCode(elem, options) {
     return (options.isInPre &&
             elem.children.length == 1 &&
             elem.children[0].name == 'code');
 }
 
+function formatParagraph(elem, fn, options) {
 
+    // Is this a block of code?
+    let code = isCode(elem, options);
+    
+    // Format the original paragraph
+    let orig = fn(elem.children, options);
+
+    // Get the lines
+    let lines = orig.split('\n');
+    
+    // Calculate the indent
+    let indent = empty.repeat(indentSpaces(header, false));
+
+    // Add an extra two spaces for code
+    if (code)
+        indent += '  ';
+
+    // Indent each of the lines
+    var text = "";
+    lines.forEach(function(line) {
+        text += indent + line + '\n';
+    });
+    
+    // Add an extra newline if _not_ code
+    if (!code)
+        text += '\n';
+    
+    return text;
+}
+
+
+// Taken directly from html-to-text/lib/formatter.js, apparently
+// just overriding the formatListItem callback doesn't work.
 function formatUnorderedList(elem, fn, options) {
-    // if this list is a child of a list-item,
-    // ensure that an additional line break is inserted
     var parentName = get(elem, 'parent.name');
     var result = parentName === 'li' ? '\n' : '';
     var prefix = options.unorderedListItemPrefix;
@@ -208,31 +218,33 @@ function formatUnorderedList(elem, fn, options) {
 
 function formatListItem(prefix, elem, fn, options) {
     options = Object.assign({}, options);
+    
     // Reduce the wordwrap for sub elements.
     if (options.wordwrap) {
         options.wordwrap -= prefix.length;
     }
+
     // Process sub elements.
     var text = fn(elem.children, options);
+
     // Replace all line breaks with line break + prefix spacing.
     text = text.replace(/\n/g, '\n' + ' '.repeat(prefix.length));
-    // Add first prefix and line break at the end.
-    return formatIndent(false) + prefix + text + '\n';
-}
 
-
-function formatBareHeading(elem, fn, options) {
-    var heading = fn(elem.children, options);
-    if (options.uppercaseHeadings) {
-        heading = heading.toUpperCase();
-    }
-    return heading + '\n';
+    // Calculate the indent
+    let indent = empty.repeat(indentSpaces(header, false));
+    
+    // Add indent, first prefix, and line break at the end.
+    return indent + prefix + text + '\n';
 }
 
 
 function formatTable(elem, fn, options) {
+
+    // Fill in the table by calling tryParseRows on
+    // each child of the table.
     var table = [];
-    function tryParseRows(elem) {
+    
+    function parseRows(elem) {
         if (elem.type !== 'tag') {
             return;
         }
@@ -241,17 +253,20 @@ function formatTable(elem, fn, options) {
         case "tbody":
         case "tfoot":
         case "center":
-            elem.children.forEach(tryParseRows);
+            elem.children.forEach(parseRows);
             return;            
         case 'tr':
             var row = [];
             elem.children.forEach(function(elem) {
+                
                 let newOptions = JSON.parse(JSON.stringify(options));
+                
                 newOptions.wordwrap = 1000;
                 if (elem.type === 'tag') {
                     switch (elem.name.toLowerCase()) {
                     case 'th':
-                        let rawHeading = formatBareHeading(elem, fn, newOptions);
+                        var rawHeading = fn(elem.children, newOptions);
+                        rawHeading += '\n';
                         row.push(rawHeading);
                         break;
                         
@@ -266,25 +281,33 @@ function formatTable(elem, fn, options) {
             row = row.map(function(col) {
                 return col || '';
             });
+            
             table.push(row);
             break;
         }
     }    
-    elem.children.forEach(tryParseRows);
+    elem.children.forEach(parseRows);
 
-    let lines = tableToString(table, options).split('\n');
+    // Convert the rows to lines
+    let lines = tableToLines(table, options);
 
+    // Calculate the indent
+    let indent = empty.repeat(indentSpaces(header, false));
+
+    // Indent each of the lines
     let text = '';
     lines.forEach(function(line) {
-        text += formatIndent(false) + line + '\n';
+        text += indent + line + '\n';
     });
 
     return text;    
 }
 
 
-function tableToString(table, options) {
-    // Find heading rows and remove them
+function tableToLines(table, options) {
+    
+    // Find special rows containing '___', these are inline
+    // headers that organize groups of rows.
     var headings = {};
     var hasHeadings = false;
     for (let r = 0; r < table.length; r++) {
@@ -298,7 +321,6 @@ function tableToString(table, options) {
     }
     
     // Determine space width per column
-    // Convert all rows to lengths
     var widths = table.map(function(row) {
         return row.map(function(col) {
             if (col.startsWith('___'))
@@ -309,15 +331,22 @@ function tableToString(table, options) {
     
     // Invert rows with colums
     widths = zip.apply(null, widths);
+    
     // Determine the max values for each column
     widths = widths.map(function(col) {
         return max(col);
     });
 
-    // Build the table
-    var text = '';
+    // The table content
+    var text = "";
+
+    // The last row index
     var lastRow = table.length - 1;
+
+    // Format the table
     for (let r = 0; r < table.length; r++) {
+
+        // Handle a heading
         if (hasHeadings && headings[r].length > 0) {
             if (r > 1)
                 text += '\n';
@@ -380,7 +409,7 @@ function tableToString(table, options) {
             text += t + '\n';
     }
     
-    return text;
+    return text.split('\n');
 }
 
 

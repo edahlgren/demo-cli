@@ -1,4 +1,4 @@
-# (source) - {{title}}
+# (source) -
 
 Source code included in this demo
 

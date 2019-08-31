@@ -14,7 +14,7 @@ function exec(args, exit) {
 
     
     // This command doesn't work inside a demo shell
-    if (!demofile.isInsideDemo()) {
+    if (false && !demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo docs' from outside of a demo shell");
     }
 
@@ -30,7 +30,13 @@ function exec(args, exit) {
 
     // Make the docs
     if (config.make) {
-        var result = makeDocs();
+        var result = makeDocs({
+            demofile: './example/shared/demo.yml',
+            template_dir: './commands/docs/templates',
+            out_text_dir: './example/docs/text',
+            out_html_dir: './example/docs/html',
+            show_progress: true
+        });
         if (!result.ok)
             exit(1, result.error_msg);
         else
