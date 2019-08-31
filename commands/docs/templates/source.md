@@ -2,27 +2,26 @@
 
 Source code included in this demo
 
-{{#source.preconfigured}}
-
+{{#repos}}
 ## {{name}}
 
 {{description}}
 
-|           |              |
-| --------- | ------------ |
-| license   | {{license}}  |
-| version   | {{version}}  |
-| authors   | {{authors}}  |
-
-### Location
-
-{{dir}}
+|             |                |
+| ----------- | -------------- |
+| ___Details  |                |
+| Authors     | {{authors}}    |
+| Version     | {{version}}    |
+| License     | {{license}}    |
+| ___Location |                |
+| Directory   | {{directory}}  |
+| Entrypoint  | {{entrypoint}} |
 
 ### Notable files
 
-|         |          |                 |
-| ------- | -------- | --------------- |
-{{#notable_files}}
-| {{tag}} | {{file}} | {{description}} |
-{{/notable_files}}
-{{/source.preconfigured}}
+|           |          |                 |
+| --------- | -------- | --------------- |
+{{#notable}}
+| ({{tag}}) | {{file}} | {{description}} |
+{{/notable}}
+{{/repos}}

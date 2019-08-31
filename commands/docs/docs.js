@@ -14,7 +14,7 @@ function exec(args, exit) {
 
     
     // This command doesn't work inside a demo shell
-    if (false && !demofile.isInsideDemo()) {
+    if (!demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo docs' from outside of a demo shell");
     }
 
@@ -27,15 +27,16 @@ function exec(args, exit) {
     if (!config.ok)
         exit(1, config.error_msg);
 
+    if (cli.help(args) && config.make)
+        exit(1, "Use either '--help' or '--make', not both at once");
 
     // Make the docs
     if (config.make) {
         var result = makeDocs({
-            demofile: './example/shared/demo.yml',
-            template_dir: './commands/docs/templates',
-            out_text_dir: './example/docs/text',
-            out_html_dir: './example/docs/html',
-            show_progress: true
+            show_progress: true,
+            demofile: '/demo/demo.yml',
+            template_dir: '/demo/docs/templates',
+            out_dir: '/demo/docs/guides'
         });
         if (!result.ok)
             exit(1, result.error_msg);
@@ -54,7 +55,7 @@ function exec(args, exit) {
 
 function asyncLess(file, exit) {
     if (!fs.existsSync(file))
-        exit(1, "docs error: '" + file + "' doesn't exist");
+        exit(1, "docs error: '" + file + "' doesn't exist. Run 'demo docs --make'");
     
     var p = proc.spawn('less', [file], {
         stdio: ['pipe', process.stdout, 'pipe']

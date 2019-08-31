@@ -1,6 +1,7 @@
 const fs = require('fs');
 const proc = require('child_process');
 
+const docs = require('../docs/docs');
 const demofile = require('../../util/demofile.js');
 const fileutil = require('../../util/file.js');
 const cli = require('./cli.js');
@@ -23,31 +24,40 @@ function exec(args, exit) {
     if (!demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo bulid' from outside of a demo shell");
     }
-    
-    // Parse the configuration from the command-line arguments
-    //
-    //   needsClean:        Whether to clean first
-    //   cleanScript:       The clean script
-    //   name:              Name of the configuration
-    //   isDefault:         Whether this is the default configuration
-    //   script:            Script to execute
-    //
-    var config = cli.parse(args, exit);
-    if (!config.ok)
+
+    // Handle help
+    if (cli.help(args)) {
+        docs.asyncLess('/demo/docs/guides/build.txt');
+    }
+    // Handle the command
+    else {
+        
+        // Parse the configuration from the command-line arguments
+        //
+        //   needsClean:        Whether to clean first
+        //   cleanScript:       The clean script
+        //   name:              Name of the configuration
+        //   isDefault:         Whether this is the default configuration
+        //   script:            Script to execute
+        //
+        var config = cli.parse(args, exit);
+        if (!config.ok)
         exit(1, config.error_msg);
 
     
-    // Clean if necessary
-    if (config.needsClean) {
-        var clean = spawnSync(config.cleanScript);
-        if (!clean.ok)
-            exit(1, "Failed to clean before build: " + clean.error_msg);
+        // Clean if necessary
+        if (config.needsClean) {
+            var clean = spawnSync(config.cleanScript);
+            if (!clean.ok)
+                exit(1, "Failed to clean before build: " + clean.error_msg);
+        }
+        
+        // Spawn script asynchronously, otherwise we can't stream out stdout
+        // quickly. Because we execute the script asynchronously, we also need
+        // to pass exit through to be called when the process exits.
+        asyncBuild(config, exit);
+        
     }
-
-    // Spawn script asynchronously, otherwise we can't stream out stdout
-    // quickly. Because we execute the script asynchronously, we also need
-    // to pass exit through to be called when the process exits.
-    asyncBuild(config, exit);
 }
 
 

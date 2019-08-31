@@ -1,4 +1,4 @@
-# (sync help) - Match a demo directory to a local directory
+# (sync) -
 
 Rsync a local directory to a directory in the demo
 

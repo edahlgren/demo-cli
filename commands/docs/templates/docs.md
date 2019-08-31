@@ -1,4 +1,4 @@
-# (docs help) -
+# (docs) -
 
 Find and generate documentation about this demo
 
@@ -36,7 +36,6 @@ The 'demo docs --make' command uses a Demofile to create markdown guides, which 
 
 |                              |                      |
 | ---------------------------- | -------------------- |
-|                              | (description)        |
 |___Source docs                |                      |
 {{#source_docs}}
 | {{file}}                     | {{description}}      |

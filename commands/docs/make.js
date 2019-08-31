@@ -19,12 +19,15 @@ const text = require('./text.js');
 //
 //  demofile:       Path to the demofile
 //  template_dir:   Path to the directory containing markdown templates
-//  out_text_dir:   Directory to write text docs
-//  out_html_dir:   Directory to write html docs
+//  out_dir:        Directory to write docs
 //  show_progress:  Show success progress
 
 
 function makeDocs(config) {
+    console.log("");
+    console.log("Making docs ...");
+    console.log("");
+    
     // Parse the demofile
     var demo = demofile.parse(config.demofile, []);
     if (!demo.ok)
@@ -53,8 +56,8 @@ function makeDocs(config) {
         // Name of the doc ('run', 'build', 'share')
         var doc_name = path.parse(md_basename).name;
 
-        // Render the docs using the template and data
-        var result = render(demo, {
+        // Config to pass to render
+        var render_config = {
             // Name of the doc to create
             doc: doc_name,
                 
@@ -62,13 +65,16 @@ function makeDocs(config) {
             md_template: path.join(config.template_dir, md_basename),
 
             // Path to the html output file
-            html_file: path.join(config.out_html_dir, doc_name + ".html"),
+            html_file: path.join(config.out_dir, doc_name + ".html"),
             
             // Path to the text output file
-            text_file: path.join(config.out_text_dir, doc_name + ".txt")
-        });
+            text_file: path.join(config.out_dir, doc_name + ".txt")
+        };
+        
+        // Render the docs using the template and data
+        var result = render(demo, render_config);
 
-        // Save errors
+        // Handle errors
         if (!result.ok)
             errors.push({
                 doc: doc_name,
@@ -77,8 +83,14 @@ function makeDocs(config) {
 
         // Show progress
         if (config.show_progress) {
-            var symbol = (result.ok ? logSymbols.success : logSymbols.error);
-            console.log("", symbol, doc_name);
+            if (result.ok) {
+                console.log(" ", logSymbols.success, doc_name);
+                console.log("   ", "-", render_config.html_file);
+                console.log("   ", "-", render_config.text_file);
+                console.log("");
+            } else {
+                console.log(" ", logSymbols.error, doc_name);
+            }
         }
     }
 
@@ -92,6 +104,10 @@ function makeDocs(config) {
         
         return { ok: false, error_msg: error_msg };
     }
+    
+    console.log("");
+    console.log(logSymbols.success, "All docs created");
+    console.log("");
     
     return { ok: true };
 }

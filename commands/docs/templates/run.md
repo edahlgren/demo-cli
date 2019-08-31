@@ -1,4 +1,4 @@
-# (run help) - 
+# (run) - 
 
 Execute the main binaries and scripts of this demo
 
@@ -31,12 +31,12 @@ $ cat run.error
 | -----------  | --------------- |
 | ___Input     |                 |
 {{#input_files}}
-| {{format}}   | {{description}} |
-{{/input}}
+| {{format}} file   | {{description}} |
+{{/input_files}}
 | ___Output    |                 | 
 {{#output_files}}
-| {{format}}   | {{description}} |
-{{/output}}
+| {{format}} file  | {{description}} |
+{{/output_files}}
 
 ## Ways to run
 
@@ -71,11 +71,9 @@ $ demo run {{name}}
 ## Command-line options
 
 |                 |             |                   |
-| --------------- | ----------- | ----------------- |
-|                 | (default)   | (description)     |
-|___Choose one    |             |                   |
+| --------------  | ----------- | ----------------- |
 {{#args_choose}}
-| ({{description}}) |           |                   |
+|___Choose one: {{description}}    |             |                   |
 {{#choices}}
 | {{options}}     | {{default}} | {{description}}   |
 {{/choices}}
@@ -95,14 +93,6 @@ $ demo run {{name}}
 $ demo run -- {{&commandline}}
 ```
 {{/examples}}
-
-## Help
-
-View this guide
-
-```
-$ demo run --help
-```
 
 ## More
 

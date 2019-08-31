@@ -1,9 +1,10 @@
 const fs = require('fs');
 const proc = require('child_process');
 
-const demofile = require('../../util/demofile.js');
-const fileutil = require('../../util/file.js');
-const cli = require('./cli.js');
+const docs = require('../docs/docs');
+const demofile = require('../../util/demofile');
+const fileutil = require('../../util/file');
+const cli = require('./cli');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,20 +25,29 @@ function exec(args, exit) {
         exit(1, "Can't run 'demo run' from outside of a demo shell");
     }
 
-    // Parse the configuration from the command-line arguments
-    //
-    //   name:              Name of the configuration
-    //   isDefault:         Whether this is the default configuration
-    //   script:            Script to execute
-    //
-    var config = cli.parse(args, exit);
-    if (!config.ok)
-        exit(1, config.error_msg);
-    
-    // Spawn script asynchronously, otherwise we can't stream out stdout
-    // quickly. Because we execute the script asynchronously, we also need
-    // to pass exit through to be called when the process exits.
-    asyncRun(config, exit);
+    // Handle help
+    if (cli.help(args)) {
+        docs.asyncLess('/demo/docs/guides/run.txt');
+    }
+    // Handle the command
+    else {
+        
+        // Parse the configuration from the command-line arguments
+        //
+        //   name:              Name of the configuration
+        //   isDefault:         Whether this is the default configuration
+        //   script:            Script to execute
+        //
+        var config = cli.parse(args, exit);
+        if (!config.ok)
+            exit(1, config.error_msg);
+        
+        // Spawn script asynchronously, otherwise we can't stream out stdout
+        // quickly. Because we execute the script asynchronously, we also need
+        // to pass exit through to be called when the process exits.
+        asyncRun(config, exit);
+        
+    }
 }
 
 

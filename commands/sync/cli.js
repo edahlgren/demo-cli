@@ -1,4 +1,5 @@
-// No deps
+const help = require('../../util/help.js');
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -6,7 +7,8 @@
 const cli = [
     { name: 'dir', type: String, multiple: true, defaultOption: true },
     { name: 'complete', type: Boolean },
-    { name: 'verbose', alias: 'v', type: Boolean }
+    { name: 'verbose', alias: 'v', type: Boolean },
+    { name: 'help', alias: 'h', type: Boolean }
 ];
 
 
@@ -36,5 +38,6 @@ function parseConfig(args) {
 
 module.exports = {
     spec: cli,
-    parse: parseConfig
+    parse: parseConfig,
+    help: help.common
 };

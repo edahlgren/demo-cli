@@ -1,10 +1,12 @@
-// No deps
+const help = require('../../util/help.js');
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
 const cli = [
     { name: 'make', type: Boolean },
+    { name: 'help', alias: 'h', type: Boolean }
 ];
 
 
@@ -27,5 +29,6 @@ function parseConfig(args) {
 
 module.exports = {
     spec: cli,
-    parse: parseConfig
+    parse: parseConfig,
+    help: help.common
 };

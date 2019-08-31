@@ -3,6 +3,7 @@ const path = require('path');
 const util = require('util');
 const proc = require('child_process');
 
+const docs = require('../docs/docs');
 const demofile = require('../../util/demofile.js');
 const cli = require('./cli.js');
 
@@ -24,22 +25,30 @@ function exec(args, exit) {
         exit(0, "Nothing to sync, no shared directory");
     }
 
-    
-    // Parse the configuration from the command-line arguments
-    //
-    //   verbose:           Whether to show rsync logs
-    //   allowDelete:       Whether to remove files at the destination
-    //   directory:         The directory to share
-    //
-    var config = cli.parse(args, exit);
-    if (!config.ok)
+    // Handle help
+    if (cli.help(args)) {
+        docs.asyncLess('/demo/docs/guides/sync.txt');
+    }
+    // Handle the command
+    else {
+        
+        // Parse the configuration from the command-line arguments
+        //
+        //   verbose:           Whether to show rsync logs
+        //   allowDelete:       Whether to remove files at the destination
+        //   directory:         The directory to share
+        //
+        var config = cli.parse(args, exit);
+        if (!config.ok)
         exit(1, config.error_msg);
-
-
-    // Rsync a directory from /shared to config.directory
-    var result = rsync(config, false /* shared */);
-    if (!result.ok)
-        exit(1, result.error_msg);        
+        
+        
+        // Rsync a directory from /shared to config.directory
+        var result = rsync(config, false /* shared */);
+        if (!result.ok)
+            exit(1, result.error_msg);
+        
+    }
 }
 
 

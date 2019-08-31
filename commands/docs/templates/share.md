@@ -1,4 +1,4 @@
-# (share help) -
+# (share) -
 
 Rsync a directory inside the demo to a local directory
 

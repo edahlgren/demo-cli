@@ -1,6 +1,6 @@
-# (build help) - 
+# (build) - 
 
-Build the main source code of this demo
+Build the source code included in this demo
 
 ## Quick reference
 
@@ -22,14 +22,6 @@ View stdout and stderr build logs
 $ cat build.log
 $ cat build.error
 ```
-
-## Files
-
-|                |                 |
-| -------------- | --------------- |
-{{#build_files}}
-| ({{file}})     | {{description}} |
-{{/build_files}}
 
 ## Ways to build
 
@@ -55,13 +47,13 @@ $ demo build {{name}}
 ```
 {{/configs}}
 
-## Help
+## Files
 
-View this guide
-
-```
-$ demo build --help
-```
+|                |                 |
+| -------------- | --------------- |
+{{#build_files}}
+| {{file}}       | {{description}} |
+{{/build_files}}
 
 ## More
 

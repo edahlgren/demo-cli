@@ -261,7 +261,7 @@ data:
     url: "http://www.math.uwaterloo.ca/tsp/world/countries.html"
     
     files:
-      - description: TSPLIB file containing the cities of Djibouti (Africa)
+      - description: TSPLIB file containing the cities of Djibouti
         path: /root/data/djibouti/dj38.tsp
         metadata:
           - description: Number of cities
@@ -269,7 +269,7 @@ data:
           - description: Optimal tour length
             data: 6656
             
-      - description: TSPLIB file containing the cities of Qatar (Middle East)
+      - description: TSPLIB file containing the cities of Qatar
         path: /root/data/qatar/qa194.tsp
         metadata:
           - description: Number of cities
@@ -277,7 +277,7 @@ data:
           - description: Optimal tour length
             data: 9352
 
-      - description: TSPLIB file containing the cities of Luxembourg (Europe)
+      - description: TSPLIB file containing the cities of Luxembourg
         path: /root/data/luxembourg/lu980.tsp
         metadata:
           - description: Number of cities

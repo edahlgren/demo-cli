@@ -1,5 +1,6 @@
 const fs = require('fs');
 const demofile = require('../../util/demofile.js');
+const help = require('../../util/help.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,5 +89,6 @@ const checks = [
 
 module.exports = {
     spec: cli,
-    parse: parseConfig
+    parse: parseConfig,
+    help: help.common
 };

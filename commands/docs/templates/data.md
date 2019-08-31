@@ -2,7 +2,7 @@
 
 Test data included in this demo
 
-{{#data.preconfigured}}
+{{#datasets}}
 ## {{title}}
 
 {{description}}
@@ -10,14 +10,14 @@ Test data included in this demo
 - Source: {{source}}
 - URL: {{url}}
 
-### Data sets
+### Files
 
 |                 |            |
 | --------------- | ---------- |
 {{#files}}
-| ___{{title}}    |            |
-{{#meta}}
+| ___{{file}}     |            |
+{{#metadata}}
 | {{description}} | {{data}}   |
-{{/meta}}
+{{/metadata}}
 {{/files}}
-{{/data.preconfigured}}
+{{/datasets}}
