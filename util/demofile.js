@@ -1,5 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const path = require('path');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -7,6 +8,12 @@ const yaml = require('js-yaml');
 
 function isInsideDemo() {
     return fs.existsSync('/demo/demo.yml');
+}
+
+function defaultDemofile() {
+    if (isInsideDemo())
+        return "/demo/demo.yml";
+    return path.join(process.cwd(), 'demo.yml');
 }
 
 function parseDemofile(file, checks) {
@@ -57,6 +64,7 @@ function getInstance(image, instance) {
 
 
 module.exports = {
+    default: defaultDemofile,
     isInsideDemo: isInsideDemo,
     parse: parseDemofile,
     getInstance: getInstance

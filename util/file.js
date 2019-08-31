@@ -1,5 +1,18 @@
 const fs = require('fs');
 
+function readYAML(file) {
+    var data = {};
+    try {
+        data = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
+    } catch (e) {
+        return {
+            ok: false,
+            error_msg: "failed to read " + file + " as YAML: " + e.toString()
+        };
+    }
+    return { ok: true, yaml: data };
+}
+
 function readContent(file) {
     var contents = '';
     try {
@@ -44,5 +57,6 @@ function readdir(dir) {
 module.exports = {
     readContent: readContent,
     writeContent: writeContent,
-    readdir: readdir
+    readdir: readdir,
+    readYAML: readYAML
 };

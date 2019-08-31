@@ -1,0 +1,57 @@
+# build_spec.yml: Description of the 'build' section in a demo.yml file
+
+# Fields:
+#
+#   + The 'doc' field:           Description of a field in a demo.yml file
+#
+#   + The 'constraints' field:   A list of constraints on a field. See about.md
+#                                for definitions of constraints
+#
+#   + The 'content' field:       Separates 'doc' and 'constraints' from real
+#                                fields in a demo.yml file. May not exist if
+#                                the content of a field is trivial (e.g. String)
+#                                or can be described by constraints (e.g. Array,
+#                                contains-String)
+
+build:
+  doc: How to build the demo
+  constraints:
+    - non-empty
+
+  content:
+    # description:
+    clean:
+      doc: A path to a script that removes old build artifacts
+      constraints:
+        - String
+        - non-empty
+        - absolute-path
+        
+    configs:
+      doc: Preconfigured ways to build the demo
+      constraints:
+        - Array
+        - non-empty
+        
+      content:
+        - doc: A scripted configuration
+          constraints:
+            - non-empty
+            
+          content:
+            name:
+              doc: Name of the configuration
+              constraints:
+                - String
+                - non-empty
+            description:
+              doc: Description of the configuration
+              constraints:
+                - String
+                - non-empty
+            script:
+              doc: Path to a script that will execute this configuration
+              constraints:
+                - String
+                - non-empty
+                - absolute-path
