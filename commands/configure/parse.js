@@ -43,25 +43,15 @@ function parse(metaObj, specObj, verbose) {
     try {
         data.meta.paths = traverse(data.meta.obj).paths();
     } catch (e) {
-        return {
-            ok: false,
-            buggy: true,
-            data: undefined,
-            msg: util.format("failed to traverse data in %s", meta_file)
-        };
+        throw new Error("BUG: failed to traverse: " + e.toString());
     }
     try {
         data.spec.paths = traverse(data.spec.obj).paths();
     } catch (e) {
-        return {
-            ok: false,
-            buggy: true,
-            data: undefined,
-            msg: util.format("failed to traverse data in %s", spec_file)
-        };
+        throw new Error("BUG: failed to traverse: " + e.toString());
     }
     if (verbose)
-        console.log(" ", logSymbols.success, "Traversed objects");
+        console.log("   ", logSymbols.success, "traversed objects");
 
     
     /////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +65,7 @@ function parse(metaObj, specObj, verbose) {
         return !skipSpecPath(path);
     });
     if (verbose)
-        console.log(" ", logSymbols.success, "Found paths");
+        console.log("   ", logSymbols.success, "found paths");
 
     
     /////////////////////////////////////////////////////////////////////////////////
@@ -87,17 +77,12 @@ function parse(metaObj, specObj, verbose) {
         var meta_signature = joinPath(meta_path);
 
         if (data.signatures.has(meta_signature)) {
-            return {
-                ok: false,
-                buggy: true,
-                data: undefined,
-                msg: "can't have two normalized metadata signatures that map to the same spec"
-            };
+            throw new Error("BUG: can't have two normalized signatures that map to the same spec");
         }
         data.signatures.set(meta_signature, spec_path);
     });
     if (verbose)
-        console.log(" ", logSymbols.success, "Created metadata signatures");
+        console.log("   ", logSymbols.success, "created metadata signatures");
 
     
     /////////////////////////////////////////////////////////////////////////////////
@@ -122,19 +107,14 @@ function parse(metaObj, specObj, verbose) {
             data.spec.unbound.push(spec_path);
     });
     if (verbose)
-        console.log(" ", logSymbols.success, "Bound metadata to specs");
+        console.log("   ", logSymbols.success, "bound metadata to specs");
 
-    
+
     /////////////////////////////////////////////////////////////////////////////////
 
     
     // Parse was successful.
-    return {
-        ok: true,
-        buggy: false,
-        data: data,
-        msg: ""
-    };
+    return { ok: true, data: data };
 }
 
 function skipSpecPath(path) {
@@ -212,22 +192,16 @@ function lookup(data, path, hasConstraints) {
     if (!result.ok) {
         return {
             ok: false,
-            value: undefined,
-            bug: util.format("cannot find %s in spec file", joinPath(path))
+            error_msg: util.format("cannot find %s in spec file", joinPath(path))
         };
     }
     if (hasConstraints && !result.value.hasOwnProperty("constraints")) {
         return {
             ok: false,
-            value: undefined,
-            bug: util.format("%s has no defined constraints", joinPath(path))
+            error_msg: util.format("%s has no defined constraints", joinPath(path))
         };
     }
-    return {
-        ok: true,
-        value: result.value,
-        bug: ""
-    };
+    return { ok: true, value: result.value };
 }
 
 module.exports = {

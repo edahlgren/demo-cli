@@ -9,6 +9,7 @@ const build = require('./commands/build/build');
 const share = require('./commands/share/share');
 const sync = require('./commands/sync/sync');
 const docs = require('./commands/docs/docs');
+const configure = require('./commands/configure/configure');
 
 const demofile = require('./util/demofile.js');
 
@@ -23,6 +24,9 @@ const cliSpec = [
 
 
 ////////////////////////////////////////////////////////////////////////////////
+
+
+main();
 
 
 function main() {
@@ -47,6 +51,11 @@ function main() {
     else
         handleCommand(args.command, argv);
 }
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
 
 function handleHelp(inDemo) {
     if (!inDemo) {
@@ -101,20 +110,24 @@ function handleCommand(command, argv) {
         var docsArgs = cli(docs.spec, { argv });
         docs.exec(docsArgs, exit);
         break;
+
+    case 'configure':
+        // Does this throw an error?
+        var configureArgs = cli(configure.spec, { argv });
+        configure.exec(configureArgs, exit);
+        break;
         
     default:
-        exit(1, "command '" + args.command + "' not implemented");
+        exit(1, "command '" + command + "' not implemented");
     }
 }
 
 function exit(code, msg) {
     if (msg && code > 0) {
-        console.error(msg);
+        console.error("\n" + msg);
     }
     if (msg && code == 0) {
-        console.log(msg);
+        console.log("\n" + msg);
     }
     process.exit(code);
 }
-
-main();

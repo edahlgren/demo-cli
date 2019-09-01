@@ -1,4 +1,5 @@
 const fs = require('fs');
+const yaml = require('js-yaml');
 
 function readYAML(file) {
     var data = {};

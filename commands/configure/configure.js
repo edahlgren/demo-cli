@@ -16,7 +16,7 @@ const cli = [
     { name: 'section', defaultOption: true },
     { name: 'check', type: Boolean },
     
-    { name: 'demofile', alias: 'f' },
+    { name: 'demofile' },
     { name: 'specdir' },
     
     { name: 'verbose', alias: 'v', type: Boolean },
@@ -46,9 +46,12 @@ function exec(args, exit) {
         var check_result = execCheck(config);
         if (!check_result.ok)
             exit(1, check_result.error_msg);
+        
+        exit(0);
     }
 
     console.log("not implemented");
+    exit(1);
 }
 
 
@@ -105,7 +108,7 @@ function parseArgs(args) {
             error_msg: "spec directory has no files"
         };
 
-    var spec_files = readdir_result.paths.map(function(p) {
+    var spec_files = readdir_result.paths.filter(function(p) {
         return path.extname(p) === '.yml';
     });
     if (spec_files.length == 0)
@@ -113,6 +116,10 @@ function parseArgs(args) {
             ok: false,
             error_msg: "spec directory has no specs"
         };
+    
+    spec_files = spec_files.map(function(file) {
+        return path.join(spec_dir, file);
+    });
 
 
     // Make sure there's a spec file that refers the section
@@ -120,16 +127,30 @@ function parseArgs(args) {
         var single_file = spec_files.filter(function(p) {
             return path.parse(p).name === args.section;
         });
-        if (single_file.length == 0)
+        
+        if (single_file.length == 0) {
+            var options = spec_files.map(function(file) {
+                return path.parse(file).name;
+            });
+
+            var error_msg = "Can't find spec for '" + args.section + "'. "
+                    + "Available specs:\n";
+            options.forEach(function(option) {
+                error_msg += "  - " + option + "\n";
+            });
+            
             return {
                 ok: false,
-                error_msg: "can't find spec file for section '" + args.section + "'"
+                error_msg: error_msg
             };
+        }
+        
         spec_files = [ single_file[0] ];
     }
 
     return {
         ok: true,
+        check: true,
         demofile: demo_file,
         specs: spec_files,
         verbose: verbose
@@ -166,72 +187,100 @@ function execCheck(config) {
             error_msg: "no specs match demo file data, nothing to do"
         };
 
+    var keys = Array.from(specs.keys());
+    console.log("\nChecking:", keys.join(', '), "\n");
+
     
     // Iterate through each of the remaining specs, checking that
     // the demo data fullfills the spec.
     var errors = [];
 
+    var first = true;
     specs.forEach(function(value, key, map) {
-        var demo_section = demo[key];
+
+        // The spec to use
         var spec = value.spec;
 
+        // Create an object to mirror the one in the spec
+        var demo_section = {};
+        demo_section[key] = demo[key];
+
+        // Print progress
+        if (config.verbose) {
+            var prefix = (first ? "" : "\n");
+            console.log(prefix + "  checking", "'" + key + "'");
+        }
+
+        // Try to match parts of the spec with parts of the section
         var parse_result = parse.do_parse(demo_section, spec,
                                           config.verbose);
         if (!parse_result.ok) {
 
             console.log(" ", logSymbols.error, demo_section);
             errors.push({
-                section: demo_section,
+                section: key,
                 error_msgs: [ "Unexpected error: " + parse_result.error_msg ]
             });
             return;
         }
 
+        // Run checks
         var check_result = check.do_check(parse_result.data,
                                           config.verbose);
         if (!check_result.ok) {
-            
-            console.log(" ", logSymbols.error, demo_section);
+            console.log(" ", logSymbols.error, key);
             errors.push({
-                section: demo_section,
-                error_msgs: check_result.issues.map(function(issue) {
-
-                    var msg = "";
-                    
-                    switch (issue.type) {
-                    case check.ISSUE_EXTRA_METADATA:
-                        msg = "This data isn't recognized and won't be used:\n";
-                        issue.paths.forEach(function(path) {
-                            msg += "    - " + path + "\n";
-                        });
-                        return msg;
-                        
-                    case check.ISSUE_REQUIRED_METADATA:
-                        msg = "These fields are required but weren't found:\n";
-                        issue.paths.forEach(function(path) {
-                            msg += "    - " + path + "\n";
-                        });
-                        return msg;
-                        
-                    case check.ISSUE_CHECKED_VALUE:
-                        msg = issue.path +  "\n";
-                        msg += "     value: " + issue.value + "\n";
-                        msg += "     issues:\n";
-                        
-                        issue.issues.forEach(function(subissue) {
-                            msg += "        - " + subissue + "\n";
-                        });
-                        return msg;
-                        
-                    default:
-                        throw new Error("BUG");
-                    }
-                })
+                section: key,
+                error_msgs: [ "Unexpected error: " + check_result.error_msg ]
             });
             return;
         }
+            
+        var error_msgs = check_result.issues.map(function(issue) {
 
-        console.log(" ", logSymbols.success, demo_section);
+            var msg = "";
+            switch (issue.type) {
+            case check.ISSUE_EXTRA_METADATA:
+                msg = "This data isn't recognized and won't be used:\n";
+                issue.paths.forEach(function(path) {
+                    msg += "    - " + path + "\n";
+                });
+                return msg;
+                
+            case check.ISSUE_REQUIRED_METADATA:
+                msg = "These fields are required but weren't found:\n";
+                issue.paths.forEach(function(path) {
+                    msg += "    - " + path + "\n";
+                });
+                return msg;
+                
+            case check.ISSUE_CHECKED_VALUE:
+                msg = issue.path +  "\n";
+                msg += "     value: " + issue.value + "\n";
+                msg += "     issues:\n";
+                
+                issue.issues.forEach(function(subissue) {
+                    msg += "        - " + subissue + "\n";
+                });
+                return msg;
+                
+            default:
+                throw new Error("BUG");
+            }
+            
+        });
+        
+        if (error_msgs.length > 0) {
+            errors.push({
+                section: key,
+                error_msgs: error_msgs
+            });
+            console.log(" ", logSymbols.error, key);
+        } else {
+            console.log(" ", logSymbols.success, key);
+        }
+            
+        first = false;
     });
 
 
@@ -240,7 +289,12 @@ function execCheck(config) {
         var error_msg = "Some checks failed. Details:\n";
         errors.forEach(function(error) {
             error_msg += "  - [" + error.section + "]:\n\n";
-            error_msg += "    " + error.error_msg + "\n\n";
+            error.error_msgs.forEach(function(msg) {
+                var lines = msg.split('\n');
+                lines.forEach(function(line) {
+                    error_msg += "    " + line + "\n";
+                });
+            });
         });
         return {
             ok: false,
@@ -250,7 +304,7 @@ function execCheck(config) {
 
 
     // Success
-    console.log(" ", logSymbols.success, "All checks succeeded");
+    console.log("\n" + logSymbols.success, "All checks succeeded\n");
     return { ok: true };
 }
 

@@ -8,18 +8,18 @@ const REQUIRED_METADATA = 1;
 const CHECKED_VALUE = 2;
 
 function check(data, verbose) {
+    var totalChecks =
+            data.meta.unbound.length +
+            data.spec.unbound.length +
+            data.meta.bound.size;
+    
     var issues = [];
-
+    
     // Check unbound data for issues first.
     var check_result = checkUnbound(data);
-    if (!check_result.ok) {
-        return {
-            ok: false,
-            buggy: true,
-            issues: [],
-            msg: check_result.msg
-        };
-    }
+    if (!check_result.ok)
+        return { ok: false, error_msg: check_result.error_msg };
+
     issues = issues.concat(check_result.issues);
 
     // Check each of the bound fields
@@ -28,48 +28,35 @@ function check(data, verbose) {
         // Lookup the metadata object
         var lookup_result_m = parse.lookup(data.meta.obj, key,
                                            false /* has constraints */);
-        if (!lookup_result_m.ok) {
-            return {
-                ok: false,
-                buggy: true,
-                issues: [],
-                msg: lookup_result_m.msg
-            };
-        }
-        var meta = lookup_result_m.value;
+        if (!lookup_result_m.ok)
+            throw new Error("BUG: " + lookup_result_m.error_msg);
 
         // Lookup the spec object
         var lookup_result_s = parse.lookup(data.spec.obj, value,
                                            true /* has constraints */);
-        if (!lookup_result_s.ok) {
-            return {
-                ok: false,
-                buggy: true,
-                issues: [],
-                msg: lookup_result_s.msg
-            };
-        }
-        var spec = lookup_result_s.value;
+        if (!lookup_result_s.ok)
+            throw new Error("BUG: " + lookup_result_s.error_msg);
 
+        var meta = lookup_result_m.value;
+        var spec = lookup_result_s.value;
+        
         var result = checkValue(key, meta, spec.constraints, verbose);
-        if (!result.ok) {
-            return {
-                ok: false,
-                buggy: true,
-                issues: [],
-                msg: result.msg
-            };
-        }
+        if (!result.ok)
+            throw new Error("BUG: " + result.error_msg);
 
         issues = issues.concat(result.issues);
     });
 
-    return {
-        ok: true,
-        buggy: false,
-        issues: issues,
-        msg: ""
-    };
+    if (verbose) {
+        if (issues.length > 0)
+            console.log("   ", logSymbols.error, issues.length + "/" + totalChecks
+                        + " checks failed");
+        else
+            console.log("   ", logSymbols.success, totalChecks + "/" + totalChecks
+                        + " checks succeeded");
+    }
+        
+    return { ok: true, issues: issues };
 }
 
 function checkUnbound(data) {
@@ -97,16 +84,10 @@ function checkUnbound(data) {
         var required = data.spec.unbound.filter(function(path) {
             var lookup_result = parse.lookup(data.spec.obj, path,
                                              true /* has constraints */);
-            if (!lookup_result.ok) {
-                return {
-                    ok: false,
-                    buggy: true,
-                    msg: lookup_result.bug,
-                    issues: []
-                };
-            }
-            var spec = lookup_result.value;
-            
+            if (!lookup_result.ok)
+                throw new Error("BUG: " + lookup_result.error_msg);
+
+            var spec = lookup_result.value;            
             return spec.constraints.includes("non-empty");
         });
 
@@ -122,12 +103,8 @@ function checkUnbound(data) {
             });
         }
     }
-
-    return {
-        ok: true,
-        msg: "",
-        issues: issues
-    };
+    
+    return { ok: true, issues: issues };
 }
 
 function checkValue(path, value, constraints, verbose) {
@@ -154,20 +131,14 @@ function checkValue(path, value, constraints, verbose) {
         default:
             return {
                 ok: false,
-                buggy: false,
-                msg: util.format("unknown constraint \"%s\". Avoid modifying the spec file",
-                                 constraint),
-                issues: []
+                error_msg: "unknown constraint '" + constraint
+                    + "'. Avoid modifying the spec file"
             };
         }
     });
 
-    if (verbose) {
-        if (issues.length > 0)
-            console.log(" ", logSymbols.error, parse.joinPath(path));
-        else
-            console.log(" ", logSymbols.success, parse.joinPath(path));
-    }
+    if (verbose && issues.length > 0)
+        console.log("   ", logSymbols.error, parse.joinPath(path));
 
     var out = [];
     if (issues.length > 0)
@@ -179,12 +150,7 @@ function checkValue(path, value, constraints, verbose) {
             issues: issues
         }];
     
-    return {
-        ok: true,
-        buggy: false,
-        msg: "",
-        issues: out
-    };
+    return { ok: true, issues: out };
 }
 
 function isString(value) {
