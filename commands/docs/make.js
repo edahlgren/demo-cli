@@ -23,9 +23,9 @@ const text = require('./text.js');
 //  show_progress:  Show success progress
 
 
-function makeDocs(config) {
+function makeHelpGuides(config) {
     console.log("");
-    console.log("Making docs ...");
+    console.log("Making help guides ...");
     console.log("");
     
     // Parse the demofile
@@ -110,6 +110,9 @@ function makeDocs(config) {
     console.log("");
     
     return { ok: true };
+}
+
+function makeConfigureGuides(config) {
 }
 
 function render(demo, config) {
@@ -203,4 +206,7 @@ function renderHTML(md) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-module.exports = makeDocs;
+module.exports = {
+    helpGuides: makeHelpGuides,
+    configureGuides: makeConfigureGuides
+};

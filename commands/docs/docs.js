@@ -3,7 +3,7 @@ const proc = require('child_process');
 
 const demofile = require('../../util/demofile.js');
 const cli = require('./cli.js');
-const makeDocs = require('./make.js');
+const make = require('./make.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ function exec(args, exit) {
 
     // Make the docs
     if (config.make) {
-        var result = makeDocs({
+        var result = make.helpGuides({
             show_progress: true,
             demofile: '/demo/demo.yml',
             template_dir: '/demo/docs/templates',
@@ -40,8 +40,18 @@ function exec(args, exit) {
         });
         if (!result.ok)
             exit(1, result.error_msg);
-        else
-            exit(0);
+
+        result = make.configureGuides({
+            show_progress: true,
+            spec_dir: '/demo/specs',
+            template_dir: '/demo/docs/templates/configure',
+            examples_dir: '/demo/docs/templates/configure/examples',
+            out_dir: '/demo/docs/guides/configure'
+        });
+        if (!result.ok)
+            exit(1, result.error_msg);
+        
+        exit(0);
     }
     
     
