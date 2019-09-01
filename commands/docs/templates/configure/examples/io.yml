@@ -1,0 +1,10 @@
+io:
+  input:
+    - description: Coordinates of a planet
+      format: CSV
+      example: /root/data/mars/coordinates.csv
+      
+  output:
+    - description: Angle and speed of the launched nuke
+      format: custom
+      example: /root/run/expected/launch.stats

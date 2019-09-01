@@ -1,0 +1,37 @@
+args:
+  choose_one:    
+    - description: Type of missile technology to use
+      required: false
+      choices:
+        - description: Russian-designed missile
+          flags:
+            - "--russian"
+          default: true
+
+        - description: Korean-designed missile
+          flags:
+            - "--korean"
+          default: false
+            
+  choose_any:
+    - description: Number of missiles to fire
+      flags:
+        - "--num"
+        - "-n"
+      required: false
+      default: 1
+      example: "-n 5"
+        
+    - description: >-
+        Path to a CSV file containing the coordinates of a planet
+      flags:
+        - "--input"
+        - "-i"
+      required: true
+      example: "-i /root/data/mars/coordinates.csv"
+
+    - description: Send an email with launch statistics
+      flags:
+        - "--notify"
+      required: false
+      example: "--notify contact@un.org"

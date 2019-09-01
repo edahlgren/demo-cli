@@ -1,0 +1,36 @@
+source:
+  - name: nukeit
+    description: >-
+      Implements a remote controlled nuclear missile launcher that is able
+      to fire nuclear missiles at planets that are millions of miles away
+    version: 1.0
+      
+    directory: /root/src/nukeit
+    entrypoint: main.c
+      
+    license: /root/src/nukeit/GPLv2.txt
+    authors:
+      - Ronald Regan
+      - John Kennedy
+      
+    notable:
+      documentation:
+        - description: Contains instructions for running
+          path: README.md
+          
+      source:
+        - description: Parses commandline arguments
+          path: parse.c
+          
+        - description: Initializes the launcher
+          path: init.c
+        
+        - description: Implements the remote controller
+          path: main.c
+          
+      build:
+        - description: Contains commands for building a nuke binary
+          path: Makefile
+          
+        - description: The nuke binary, the output of a successful build
+          path: nuke

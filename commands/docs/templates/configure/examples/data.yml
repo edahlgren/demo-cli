@@ -1,0 +1,24 @@
+data:
+  - title: Planetary Locations Dataset
+    description: >-
+      CSV formatted files containing the coordinates of planets in Earth's
+      solar system
+    source: Institute for Evil Research
+    url: "http://www.ier.org/datasets/planets.html"
+    
+    files:
+      - description: CSV file containing the coordinates of Mars
+        path: /root/data/mars/coordinates.csv
+        metadata:
+          - description: Average distance from Earth (million miles)
+            data: 140
+          - description: Planetary order relative to the Sun
+            data: 4
+            
+      - description: CSV file containing the coordinates of Jupiter
+        path: /root/data/jupiter/coordinates.csv
+        metadata:
+          - description: Average distance from Earth (million miles)
+            data: 483
+          - description: Planetary order relative to the Sun
+            data: 5

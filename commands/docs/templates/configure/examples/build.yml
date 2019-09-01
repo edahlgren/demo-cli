@@ -1,0 +1,15 @@
+build:  
+  clean: /demo/build/clean.sh
+  
+  configs:
+    - name: default
+      description: Build the nuclear launcher with gcc
+      script: /demo/build/default.sh
+      
+    - name: optimized
+      description: Build the nuclear launcher at optimization level 3
+      script: /demo/build/optimized.sh
+
+    - name: debug
+      description: Build the nuclear launcher with debug symbols
+      script: /demo/build/debug.sh

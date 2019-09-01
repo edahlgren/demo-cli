@@ -1,0 +1,27 @@
+constraints:
+  - name: none
+    description: No requirements
+    
+  - name: Boolean
+    description: "Must be 'true' or 'false'"
+    
+  - name: Number
+    description: Must be a number
+    
+  - name: String
+    description: Must be a string
+        
+  - name: Array
+    description: Must be an array
+
+  - name: non-empty
+    description: "Can't be missing or empty"
+
+  - name: absolute-path
+    description: Must be an absolute file path
+
+  - name: relative-path
+    description: Must be a relative file path
+    
+  - name: url-path
+    description: Must be an http or https url path

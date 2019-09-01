@@ -1,0 +1,15 @@
+papers:
+  - path: /docs/papers/RussianMissiles.pdf
+    year_published: 1986
+    authors:
+      - Mikhail Gorbachev
+      - Konstantin Chernenko
+    keywords:
+      - Russian Nuclear Missile Design
+
+  - path: /docs/papers/KoreanMissiles.pdf
+    year_published: 2012
+    authors:
+      - Kim Jong Un
+    keywords:
+      - Korean Nuclear Missile Design
