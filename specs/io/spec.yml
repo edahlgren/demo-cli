@@ -1,0 +1,76 @@
+# io_spec.yml: Description of the 'io' section in a demo.yml file
+
+# Fields:
+#
+#   + The 'doc' field:           Description of a field in a demo.yml file
+#
+#   + The 'constraints' field:   A list of constraints on a field. See about.md
+#                                for definitions of constraints
+#
+#   + The 'content' field:       Separates 'doc' and 'constraints' from real
+#                                fields in a demo.yml file. May not exist if
+#                                the content of a field is trivial (e.g. String)
+#                                or can be described by constraints (e.g. Array,
+#                                contains-String)
+
+io:
+  doc: "Input and output of the demo (files)"
+  constraints:
+    - non-empty
+
+  content:
+    input:
+      doc: Input files
+      constraints:
+        - Array
+        - non-empty
+      content:
+        - doc: An input file
+          constraints:
+            - non-empty
+          content:
+            description:
+              doc: Description of the input file
+              constraints:
+                - String
+                - non-empty
+            format:
+              doc: >-
+                "The input file's format (e.g. CSV). Use 'custom' if unknown"
+              constraints:
+                - String
+                - non-empty
+            example:
+              doc: Path to an example of this type of file
+              constraints:
+                - String
+                - non-empty
+                - absolute-path
+                
+    output:
+      doc: Output files
+      constraints:
+        - Array
+        - non-empty
+      content:
+        - doc: An output file
+          constraints:
+            - non-empty
+          content:
+            description:
+              doc: Description of the output file
+              constraints:
+                - String
+                - non-empty
+            format:
+              doc: >-
+                "The output file's format (e.g. CSV). Use 'custom' if unknown"
+              constraints:
+                - String
+                - non-empty
+            example:
+              doc: Path to an example of this type of file
+              constraints:
+                - String
+                - non-empty
+                - absolute-path

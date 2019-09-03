@@ -1,0 +1,23 @@
+run:
+  
+  description: Nuke a planet
+  
+  configs:
+    - name: mars
+      description: Nuke the planet Mars
+      script: /demo/run/mars.sh
+      
+    - name: jupiter
+      description: Nuke the planet Jupiter
+      script: /demo/run/jupiter.sh
+      
+  examples:
+    - description: Send 5 nuclear missiles to Mars
+      args:
+        - '-n 5'
+        - '-i /root/data/mars/coordinates.csv'
+        
+    - description: Nuke Jupiter and notify the UN
+      args:
+        - '--notify contact@un.org'
+        - '-i /root/data/jupiter/coordinates.csv'        

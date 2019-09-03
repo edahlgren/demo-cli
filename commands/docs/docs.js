@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const proc = require('child_process');
 
 const demofile = require('../../util/demofile.js');
@@ -14,7 +15,7 @@ function exec(args, exit) {
 
     
     // This command doesn't work inside a demo shell
-    if (!demofile.isInsideDemo()) {
+    if (false && !demofile.isInsideDemo()) {
         exit(1, "Can't run 'demo docs' from outside of a demo shell");
     }
 
@@ -32,22 +33,26 @@ function exec(args, exit) {
 
     // Make the docs
     if (config.make) {
-        var result = make.helpGuides({
-            show_progress: true,
-            demofile: '/demo/demo.yml',
-            template_dir: '/demo/docs/templates',
-            out_dir: '/demo/docs/guides'
-        });
-        if (!result.ok)
-            exit(1, result.error_msg);
 
-        result = make.configureGuides({
+        var commands_dir = path.resolve(__dirname, '../');
+        var specs_dir = path.resolve(__dirname, '../../specs');
+        
+        var result = make.all({
+            // Print success or failure for each doc
             show_progress: true,
-            spec_dir: '/demo/specs',
-            template_dir: '/demo/docs/templates/configure',
-            examples_dir: '/demo/docs/templates/configure/examples',
-            out_dir: '/demo/docs/guides/configure'
+
+            // Path to the current configuration
+            demo_file: './example/shared/demo.yml',
+
+            // Path to the commands this CLI supports
+            commands_dir: commands_dir,
+            commands_out: './example/docs/guides/commands',
+
+            // Paths to the specs sections of the demo file
+            specs_dir: specs_dir,
+            specs_out: './example/docs/guides/specs'
         });
+        
         if (!result.ok)
             exit(1, result.error_msg);
         

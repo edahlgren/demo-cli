@@ -1,104 +1,35 @@
-const util = require('util');
 const fs = require('fs');
 const path = require('path');
-
 const logSymbols = require('log-symbols');
-const mustache = require('mustache');
-const { Remarkable } = require('remarkable');
 
-const demofile = require('../../util/demofile.js');
 const fileutil = require('../../util/file.js');
-
-const vars = require('./vars.js');
-const text = require('./text.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Config
-//
-//  demofile:       Path to the demofile
-//  template_dir:   Path to the directory containing markdown templates
-//  out_dir:        Directory to write docs
-//  show_progress:  Show success progress
 
 
-function makeHelpGuides(config) {
+function make_all(config) {
+
     console.log("");
-    console.log("Making help guides ...");
+    console.log("Making docs ...");
     console.log("");
     
-    // Parse the demofile
-    var demo = demofile.parse(config.demofile, []);
-    if (!demo.ok)
-        return demo;
+    var command_errors = make_command_guides(config.demo_file,
+                                             config.commands_dir,
+                                             config.commands_out,
+                                             config.show_progress);
+    
+    var specs_errors = make_spec_guides(config.specs_dir,
+                                        config.specs_out,
+                                        config.show_progress);
 
-    // Read the directory entries of the template dir
-    var ts = fileutil.readdir(config.template_dir);
-    if (!ts.ok)
-        return ts;
-
-    // Filter for paths that end in ".md"
-    var mds = ts.paths.filter(function(p) {
-        return (path.extname(p) === ".md");
-    });
-
-    // Collect errors and to format them into a single
-    // error message.
-    var errors = [];
-
-    // Handle each template
-    for (var i = 0; i < mds.length; i++) {
-
-        // Basename of the markdown template
-        var md_basename = mds[i];
-
-        // Name of the doc ('run', 'build', 'share')
-        var doc_name = path.parse(md_basename).name;
-
-        // Config to pass to render
-        var render_config = {
-            // Name of the doc to create
-            doc: doc_name,
-                
-            // Path to the markdown template
-            md_template: path.join(config.template_dir, md_basename),
-
-            // Path to the html output file
-            html_file: path.join(config.out_dir, doc_name + ".html"),
-            
-            // Path to the text output file
-            text_file: path.join(config.out_dir, doc_name + ".txt")
-        };
-        
-        // Render the docs using the template and data
-        var result = render(demo, render_config);
-
-        // Handle errors
-        if (!result.ok)
-            errors.push({
-                doc: doc_name,
-                error_msg: result.error_msg                
-            });
-
-        // Show progress
-        if (config.show_progress) {
-            if (result.ok) {
-                console.log(" ", logSymbols.success, doc_name);
-                console.log("   ", "-", render_config.html_file);
-                console.log("   ", "-", render_config.text_file);
-                console.log("");
-            } else {
-                console.log(" ", logSymbols.error, doc_name);
-            }
-        }
-    }
-
+    var errors = command_errors.concat(specs_errors);
+    
     if (errors.length > 0) {
         var error_msg = "\nSome issues were encountered while creating docs:\n\n";
 
         errors.forEach(function(error) {
-            error_msg += "  - " + error.doc + ": " + error.error_msg + "\n";
+            error_msg += "  - " + error.guide + ": " + error.error_msg + "\n";
         });
         error_msg += "\n";
         
@@ -112,94 +43,213 @@ function makeHelpGuides(config) {
     return { ok: true };
 }
 
-function makeConfigureGuides(config) {
-}
-
-function render(demo, config) {
-
-    // Parse the data needed by the template
-    var variables = vars.fromDemo(config.doc, demo);
-    if (!variables.ok)
-        return variables;
-
+function make_command_guides(demo_file, commands_dir,
+                             out_dir, show_progress) {
     
-    // Markdown template -> markdown
-    var md = renderMarkdown(config.md_template, variables);
-    if (!md.ok)
-        return md;
-
-
-    // Markdown -> HTML
-    var html = renderHTML(md.md);
-    if (!html.ok)
-        return html;
-
+    // Iterate through the commands
+    var commands = fileutil.readdir(commands_dir);
+    if (!commands.ok)
+        return commands;
     
-    // Wrap the html in a "guide" class.
-    var wrapped_html = '<div class="guide">' + html.html + '</div>';
-
-    
-    // HTML -> file
-    var write_result = fileutil.writeContent(config.html_file, html);
-    if (!write_result.ok)
-        return write_result;
-
-
-    // HTML -> raw text
-    var rawtext = text.fromHTML(wrapped_html, {
-        baseElement: 'div.guide',
-        wordwrap: 70,
-        unorderedListItemPrefix: '+ '
+    // Filter for commands that have guides, and warn on commands
+    // that are missing a guide
+    var has_guide = commands.paths.filter(function(command) {
+        var dir = path.join(commands_dir, command);
+        
+        if (!has_guide(dir)) {
+            console.log("!!", "skipping", "'" + command + "',",
+                        "doesn't have a guide");
+            return false;
+        }
+        
+        return true;
     });
-    if (!rawtext.ok)
-        return rawtext;
 
+    // How to execute the make script in the command dir
+    function make(command_dir) {
+        // Find the template
+        var template = path.join(command_dir, "guide/template.md");
+        if (!fs.existsSync(template))
+            return { ok: false, error_msg: "" };
+
+        // Find the script
+        var script = path.join(command_dir, "guide/make.js");
+        if (!fs.existsSync(script))
+            return { ok: false, error_msg: "" };
+
+        // Load the script
+        var guide = require(script);
+
+        // Make the guide
+        return guide.make(demo_file, template, out_dir);
+    }
     
-    // Text -> file
-    write_result = fileutil.writeContent(config.text_file, rawtext.text);
-    if (!write_result.ok)
-        return write_result;
+    // Keep track of errors
+    var errors = [];
 
-    
-    // Successfully rendered and wrote all docs
-    return { ok: true };
-}
+    // Iterate through command guides
+    for (var i = 0; i < has_guide.length; i++) {
+        
+        // Find the command dir
+        var command_dir = path.join(commands_dir, has_guide[i]);
 
-function renderMarkdown(template_file, data) {
-    var template = fileutil.readContent(template_file);
-    if (!template.ok)
-        return template;
+        // Execute the make function above
+        var result = make(command_dir);
 
-    var md = '';
-    try {    
-        md = mustache.render(template.content, data);
-    } catch (error) {
-        return {
-            ok: false,
-            error_msg: error.toString()
-        };
+        // Handle errors
+        if (!result.ok)
+            errors.push({
+                guide: has_guide[i],
+                error_msg: result.error_msg
+            });
+
+        if (show_progress) {
+            var symbol = result.ok ? logSymbols.success : logSymbols.error;
+            console.log(" ", symbol, has_guide[i]);
+        }
     }
 
-    return { ok: true, md: md };
+    // Return errors
+    return errors;
 }
 
-function renderHTML(md) {
-    var mdParser = new Remarkable({
-        html: true,
-        breaks: true
-    });
+function make_spec_guides(specs_dir, out_dir, show_progress) {
     
-    var html = '';
-    try {
-        html = mdParser.render(md);
-    } catch (error) {
+    // Iterate through the commands
+    var specs = fileutil.readdir(specs_dir);
+    if (!specs.ok)
+        return specs;
+
+    // Find the constraints file
+    var constraints_file = path.join(specs_dir, 'constraints.yml');
+    if (!fs.existsSync(constraints_file))
         return {
             ok: false,
-            error_msg: error.toString()
+            error_msg: "can't find constraint descriptions at spec_dir/constraints.yml"
         };
+    
+    // Filter for commands that have specs and guides, and warn
+    // on commands that don't.
+    var has_data_for_guide = specs.paths.filter(function(spec) {
+        var dir = path.join(specs_dir, spec);
+
+        // Skip things that aren't specs (constraints.yml)
+        var spec_file = path.join(dir, "spec.yml");
+        if (!fs.existsSync(spec_file)) {
+            return false;
+        }
+        
+        var example_file = path.join(dir, "example.yml");
+        if (!fs.existsSync(example_file)) {
+            console.log("!!", "skipping", "'" + spec + "',",
+                        "doesn't have an example");
+            return false;
+        }
+
+        if (!has_guide(dir)) {
+            console.log("!!", "skipping", "'" + spec + "',",
+                        "doesn't have a guide");
+            return false;
+        }
+        
+        return true;
+    });
+
+    
+    // Load constraint descriptions
+    var constraints_result = load_constraints(constraints_file);
+    if (!constraints_result.ok)
+        return constraints_result;
+    
+    var constraints = constraints_result.constraints;
+
+    // How to execute the make script in the spec dir
+    function make(dir) {
+
+        // Files
+        var spec_file = path.join(dir, "spec.yml");
+        var example_file = path.join(dir, "example.yml");
+        var template = path.join(dir, "guide/template.md");
+        var script = path.join(dir, "guide/make.js");
+        
+        // Load the script
+        var guide = require(script);
+
+        // Make the guide
+        return guide.make(spec_file, example_file,
+                          constraints, template, out_dir);
+    }
+    
+    // Keep track of errors
+    var errors = [];
+
+    // Iterate through command guides
+    for (var i = 0; i < has_guide.length; i++) {
+        
+        // Find the spec dir
+        var dir = path.join(specs_dir, has_guide[i]);
+
+        // Execute the make function above
+        var result = make(dir);
+
+        // Handle errors
+        if (!result.ok)
+            errors.push({
+                guide: has_guide[i],
+                error_msg: result.error_msg
+            });
+        
+        if (show_progress) {
+            var symbol = result.ok ? logSymbols.success : logSymbols.error;
+            console.log(" ", symbol, has_guide[i]);
+        }
     }
 
-    return { ok: true, html: html };
+    // Return errors
+    return errors;        
+}
+
+function has_guide(dir) {
+    var guide = path.join(dir, 'guide');
+    if (!fs.existsSync(guide)) {
+        return false;
+    }
+
+    var template = path.join(guide, 'template.md');
+    if (!fs.existsSync(template)) {
+        return false;
+    }
+        
+    var script = path.join(guide, 'make.js');
+    if (!fs.existsSync(script)) {
+        return false;
+    }
+
+    return true;
+}
+
+function load_constraints(file) {
+    var yaml_result = fileutil.readYAML(constraints_file);
+    if (!yaml_result.ok)
+        return yaml_result;
+
+    var cs = yaml_result.yaml;
+    var map = new Map();
+
+    for (var i = 0; i < cs.constraints.length; i++) {
+        var constraint = cs.constraints[i];
+        var value = map.get(constraint.name);
+        if (value) {
+            return {
+                ok: false,
+                error_msg: "Malformed file: constraint " + constraint.name +
+                    " listed twice"
+            };
+        }
+        map.set(constraint.name, constraint.description);
+    }
+    
+    return map;
 }
 
 
@@ -207,6 +257,5 @@ function renderHTML(md) {
 
 
 module.exports = {
-    helpGuides: makeHelpGuides,
-    configureGuides: makeConfigureGuides
+    all: make_all
 };
