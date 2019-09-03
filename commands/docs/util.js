@@ -1,4 +1,5 @@
 const fs   = require('fs');
+const path = require('path');
 const traverse = require('traverse');
 const yaml = require('js-yaml');
 
@@ -9,6 +10,28 @@ const render = require('./render');
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
+function standard_spec_guide(name, spec_file, example_file, constraints,
+                             template, out_dir) {
+    
+    var vars = spec_guide_vars(spec_file, example_file, constraints);
+    if (!vars.ok)
+        return vars;
+
+    var text_options = {
+        separateTwoColumns: true,
+        dotsBetweenColumns: true,
+        indentWrapTable: false,
+        minColumnPad: 10
+    };
+    
+    return render.render({
+        vars: vars,
+        template: template,
+        html: path.join(out_dir, name + ".html"),
+        text: path.join(out_dir, name + ".txt")
+    }, text_options);    
+}
 
 function spec_guide_vars(spec_file, example_file, constraints) {
 
@@ -152,5 +175,5 @@ function spec_guide_vars(spec_file, example_file, constraints) {
 
 
 module.exports = {
-    spec_guide_vars: spec_guide_vars
+    standard_spec_guide: standard_spec_guide
 };

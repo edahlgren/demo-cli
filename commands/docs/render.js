@@ -22,8 +22,16 @@ var header = "";
 
 ////////////////////////////////////////////////////////////////////////////////
 
+const default_text_options = {
+    wordwrap: 80,
+    unorderedListItemPrefix: '+ ',
+    separateTwoColumns: false,
+    dotsBetweenColumns: false,
+    indentWrapTable: true,
+    minColumnPad: 2
+};
 
-function render(config) {
+function render(config, text_options) {
 
     // Markdown template -> markdown
     var md = renderMarkdown(config.template, config.vars);
@@ -47,12 +55,16 @@ function render(config) {
         return write_result;
 
 
+    // Copy default so we don't screw up the original
+    var defaults = Object.assign({}, default_text_options);
+    
+    // Merge text rendering options with defaults
+    var options = Object.assign(defaults,
+                                (text_options ? text_options : {}),
+                                { baseElement: 'div.guide' });
+    
     // HTML -> raw text
-    var rawtext = textFromHTML(wrapped_html, {
-        baseElement: 'div.guide',
-        wordwrap: 70,
-        unorderedListItemPrefix: '+ '
-    });
+    var rawtext = textFromHTML(wrapped_html, options);
     if (!rawtext.ok)
         return rawtext;
 
@@ -105,8 +117,8 @@ function renderHTML(md) {
 }
 
 function textFromHTML(html, options) {
-    var text = lessGuide();
     
+    var text = lessGuide();    
     try {
         text += renderText(html, options);
     } catch (error) {
@@ -135,19 +147,19 @@ function renderText(html, options) {
     header = "";
     
     htmlToText.fromString(html, {
-        
+                
         baseElement: options.baseElement,
         wordwrap: options.wordwrap,
         unorderedListItemPrefix: options.unorderedListItemPrefix,
         
-        // Parse all tables
         tables: true,
-
-        // Don't uppercase headings as they're parsed
         uppercaseHeadings: false,
-
-        // Won't have any images so doesn't matter
         ignoreImage: true,
+        
+        spaceTwo: options.separateTwoColumns,
+        drawDots: options.dotsBetweenColumns,
+        indentWrapTable: options.indentWrapTable,
+        minColumnPad: options.minColumnPad,
         
         format: {
             heading: function(elem, fn, options) {
@@ -253,8 +265,30 @@ function isCode(elem, options) {
             elem.children[0].name == 'code');
 }
 
-function formatParagraph(elem, fn, options) {
+function is_header(elem) {
+    if (elem.type !== "tag")
+        return false;
+    
+    switch(elem.name.toLowerCase()) {
+    case 'h1', 'h2', 'h3', 'h4', 'h5', 'h6':
+        return true;
+    default:
+        return false;
+    }
+}
 
+function formatParagraph(elem, fn, options) {
+    let prev = elem.prev;
+    while (prev) {
+        if (prev.type === "text" &&
+            prev.data.trim().length == 0) {
+            prev = prev.prev;
+            continue;
+        }
+        break;
+    }
+    let firstAfterHeader = prev && is_header(prev);
+    
     // Is this a block of code?
     let code = isCode(elem, options);
     
@@ -267,8 +301,9 @@ function formatParagraph(elem, fn, options) {
     // Calculate the indent
     let indent = empty.repeat(indentSpaces(header, false));
 
-    // Add an extra two spaces for code
-    if (code)
+    // Add an extra two spaces for code that's not directly
+    // under a header
+    if (!firstAfterHeader && code)
         indent += '  ';
 
     // Indent each of the lines
@@ -312,14 +347,14 @@ function formatListItem(prefix, elem, fn, options) {
     // Process sub elements.
     var text = fn(elem.children, options);
 
-    // Replace all line breaks with line break + prefix spacing.
-    text = text.replace(/\n/g, '\n' + ' '.repeat(prefix.length));
-
     // Calculate the indent
     let indent = empty.repeat(indentSpaces(header, false));
     
+    // Replace all line breaks with line break + prefix spacing.
+    text = text.replace(/\n/g, '\n' + indent + ' '.repeat(prefix.length));
+    
     // Add indent, first prefix, and line break at the end.
-    return indent + prefix + text + '\n';
+    return indent + prefix + text + '\n\n';
 }
 
 
@@ -344,9 +379,9 @@ function formatTable(elem, fn, options) {
             var row = [];
             elem.children.forEach(function(elem) {
                 
-                let newOptions = JSON.parse(JSON.stringify(options));
-                
+                let newOptions = JSON.parse(JSON.stringify(options));                
                 newOptions.wordwrap = 1000;
+                
                 if (elem.type === 'tag') {
                     switch (elem.name.toLowerCase()) {
                     case 'th':
@@ -356,7 +391,25 @@ function formatTable(elem, fn, options) {
                         break;
                         
                     case 'td':
+                        var isPre = (elem.children.length == 1 &&
+                                     elem.children[0].name === 'pre');
+                        var isList = (elem.children.length == 1 &&
+                                      elem.children[0].name === 'ul');
+                        var isHr = (elem.children.length == 1 &&
+                                      elem.children[0].name === 'hr');
                         let rawText = fn(elem.children, newOptions);
+
+                        if (isPre || isList)
+                            rawText = rawText.trimRight();
+                        
+                        if (isList)
+                            rawText = rawText.split('\n').map(function(item) {
+                                return '  ' + item;
+                            }).join('\n');
+                        
+                        if (isHr)
+                            rawText = "<hr>";
+
                         row.push(rawText);
                         break;
                     }
@@ -410,7 +463,12 @@ function tableToLines(table, options) {
         return row.map(function(col) {
             if (col.startsWith('___'))
                 return 0;
-            return col.length;
+            
+            let lines = col.split('\n').map(function(line) {
+                return line.length;
+            });
+            
+            return max(lines);
         });
     });
     
@@ -422,6 +480,14 @@ function tableToLines(table, options) {
         return max(col);
     });
 
+    // Fill out remaining space
+    var onlyTwo = (widths.length == 2);
+    if (options.spaceTwo && onlyTwo) {
+        let maxwrap = options.wordwrap + 10;
+        if ((widths[0] + widths[1]) < maxwrap)
+            widths[0] = maxwrap - widths[1];
+    }
+    
     // The table content
     var text = "";
 
@@ -446,14 +512,33 @@ function tableToLines(table, options) {
         let firstLen = 0;        
         let last = row.length - 1;
 
+        // Check for embedded <hr> line breaks
+        var hasBreak = false;
+        
+        // Create extra padding
+        const extraPadEnd = ' '.repeat(options.minColumnPad);
+        
         // Handle row
         for (var j = 0; j < row.length; j++) {
             let col = row[j];            
             let width = widths[j];
 
+            // Is this a row with a break?
+            var isBreak = (col === "<hr>");
+            if (isBreak)
+                col = " ";
+            hasBreak = hasBreak | isBreak;
+            
+            // Handle columns before last
             if (j < last) {
-                // Handle columns before last
-                let fmt = padEnd(col, width, ' ') + '   ';
+
+                // Default case, no dots
+                let fmt = padEnd(col, width, ' ') + extraPadEnd;
+
+                // Add dots if necessary
+                if (options.drawDots && col.trim().length > 0)
+                    fmt = padEnd(col, width + extraPadEnd.length - 1, ' .') + ' ';
+
                 t += fmt;
                 firstLen += fmt.length;
                 continue;
@@ -464,27 +549,39 @@ function tableToLines(table, options) {
             if (max < 45)
                 max = 45;
 
+            let prelines = col.split('\n');
+            let hasLines = prelines.length > 1;
+            
             // Handle simple case (no word wrap necessary)
-            if (col.length <= max) {
+            if (!hasLines && col.length <= max) {
                 t += col;
                 break;
             }
 
-            // Get wrapped lines
-            let lines = wrap(col, { width: max, indent: '' }).split('\n');
+            let lines = [];
+            prelines.forEach(function(line) {
+                let sublines = wrap(line, { width: max, indent: '' }).split('\n');
+                sublines.forEach(function(subline) {
+                    lines.push(subline);
+                });
+            });
             
             // Handle the first
             t += lines[0];
             if (lines.length > 1) {
+                let indentNum = firstLen;
+                if (options.indentWrapTable)
+                    indentNum += 4;
+                
                 for (let l = 1; l < lines.length; l++) {
-                    t += '\n' + (' ').repeat(firstLen + 2) + lines[l];
+                    t += '\n' + (' ').repeat(indentNum) + lines[l];
                 }
             }
             break;
         }
 
         // Skip empty rows
-        if (t.trim().length == 0)
+        if (!hasBreak && t.trim().length == 0)
             continue;
 
         // Create inner table headings

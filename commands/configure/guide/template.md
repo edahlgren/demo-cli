@@ -59,11 +59,6 @@ YAML ("YAML Ain't Markup Language") is a simple, human-readable data format. Pop
 
 |                                |                          |                      |
 | ------------------------------ | ------------------------ | -------------------- |
-| ___[Comments]             |                               |                      |
-| YAML                           | JSON                          | TOML                 |
-| ----                           | ----                          | ----                 |
-| <pre># This is a comment</pre> | N/A                           | <pre># This is a comment</pre> |
-|                                |                               | <hr>                 |
 | ___[Fields and values]    |                          |                      |
 | YAML                           | JSON                     | TOML                 |
 | ----                           | ----                     | ----                 |
@@ -97,6 +92,11 @@ YAML ("YAML Ain't Markup Language") is a simple, human-readable data format. Pop
 | <pre>  on multiple lines</pre> |                               | <pre>        on multiple lines\\</pre> |
 | <pre>  (no line break).</pre>  |                               | <pre>        (no line break).\\</pre> |
 |                                |                               | <pre>        """</pre> |
+| ___[Comments]             |                               |                      |
+| YAML                           | JSON                          | TOML                 |
+| ----                           | ----                          | ----                 |
+| <pre># This is a comment</pre> | N/A                           | <pre># This is a comment</pre> |
+|                                |                               | <hr>                 |
 
 ### [Notes]
 

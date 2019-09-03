@@ -12,19 +12,19 @@ const render = require('./render');
 function make_all(config) {
 
     console.log("");
-    console.log("Making general help ...");
+    console.log(" Making general help ...");
     console.log("");
     
     var toplevel_errors = make_toplevel_guide(config);
 
     console.log("");
-    console.log("Making command guides ...");
+    console.log(" Making command guides ...");
     console.log("");
 
     var command_errors = make_command_guides(config);
     
     console.log("");
-    console.log("Making configure guides ...");
+    console.log(" Making configuration guides ...");
     console.log("");
     
     var specs_errors = make_spec_guides(config);
@@ -48,10 +48,15 @@ function make_all(config) {
 
 function make_toplevel_guide(config) {
     var result = render.render({
+        // General render options
         vars: {},
         template: path.join(config.commands_dir, "help.md"),
         html: path.join(config.commands_out, "help.html"),
         text: path.join(config.commands_out, "help.txt")
+    }, {
+        // Text rendering options
+        indentWrapTable: false,
+        minColumnPad: 5
     });
 
     if (config.show_progress) {
