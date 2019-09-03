@@ -60,7 +60,7 @@ function make(demo_file, template, out_dir) {
             };
         });
 
-    return render.doc({
+    return render.render({
         vars: variables,
         template: template,
         html: path.join(out_dir, "run.html"),

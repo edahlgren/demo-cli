@@ -3,6 +3,7 @@ const path = require('path');
 const logSymbols = require('log-symbols');
 
 const fileutil = require('../../util/file.js');
+const render = require('./render');
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -11,20 +12,24 @@ const fileutil = require('../../util/file.js');
 function make_all(config) {
 
     console.log("");
-    console.log("Making docs ...");
+    console.log("Making general help ...");
     console.log("");
     
-    var command_errors = make_command_guides(config.demo_file,
-                                             config.commands_dir,
-                                             config.commands_out,
-                                             config.show_progress);
-    
-    var specs_errors = make_spec_guides(config.specs_dir,
-                                        config.specs_out,
-                                        config.show_progress);
+    var toplevel_errors = make_toplevel_guide(config);
 
-    var errors = command_errors.concat(specs_errors);
+    console.log("");
+    console.log("Making command guides ...");
+    console.log("");
+
+    var command_errors = make_command_guides(config);
     
+    console.log("");
+    console.log("Making configure guides ...");
+    console.log("");
+    
+    var specs_errors = make_spec_guides(config);
+
+    var errors = toplevel_errors.concat(command_errors, specs_errors);
     if (errors.length > 0) {
         var error_msg = "\nSome issues were encountered while creating docs:\n\n";
 
@@ -35,30 +40,59 @@ function make_all(config) {
         
         return { ok: false, error_msg: error_msg };
     }
-    
-    console.log("");
-    console.log(logSymbols.success, "All docs created");
+
     console.log("");
     
     return { ok: true };
 }
 
-function make_command_guides(demo_file, commands_dir,
-                             out_dir, show_progress) {
+function make_toplevel_guide(config) {
+    var result = render.render({
+        vars: {},
+        template: path.join(config.commands_dir, "help.md"),
+        html: path.join(config.commands_out, "help.html"),
+        text: path.join(config.commands_out, "help.txt")
+    });
+
+    if (config.show_progress) {
+        var symbol = result.ok ? logSymbols.success : logSymbols.error;
+        console.log(" ", symbol, "general help");
+    }
+    
+    if (!result.ok)
+        return [{
+            guide: "help",
+            error_msg: result.error_msg
+        }];
+
+    return [];
+}
+
+function make_command_guides(config) {
+    
+    // Keep track of errors
+    var errors = [];
     
     // Iterate through the commands
-    var commands = fileutil.readdir(commands_dir);
-    if (!commands.ok)
-        return commands;
+    var commands = fileutil.readdir(config.commands_dir);
+    if (!commands.ok) {
+        errors.push({
+            guide: "general",
+            error_msg: commands.error_msg
+        });
+        return errors;
+    }
     
     // Filter for commands that have guides, and warn on commands
     // that are missing a guide
-    var has_guide = commands.paths.filter(function(command) {
-        var dir = path.join(commands_dir, command);
+    var has_data_for_guide = commands.paths.filter(function(command) {
+        var dir = path.join(config.commands_dir, command);
+
+        if (command === "help.md")
+            return false;
         
         if (!has_guide(dir)) {
-            console.log("!!", "skipping", "'" + command + "',",
-                        "doesn't have a guide");
+            console.log(" ", logSymbols.warning, command, "---", "no guide");
             return false;
         }
         
@@ -80,18 +114,36 @@ function make_command_guides(demo_file, commands_dir,
         // Load the script
         var guide = require(script);
 
+        if (guide.needs_all_specs) {
+            var specs = fileutil.readdir(config.specs_dir);
+            if (!specs.ok)
+                return specs;
+            
+            var has_spec = specs.paths.filter(function(spec) {
+                var dir = path.join(config.specs_dir, spec);
+
+                // Skip things that aren't specs (constraints.yml)
+                var spec_file = path.join(dir, "spec.yml");
+                return fs.existsSync(spec_file);
+            });
+
+            var spec_files = has_spec.map(function(spec_dir) {
+                return path.join(config.specs_dir, spec_dir, "spec.yml");
+            });
+
+            return guide.make(spec_files, template, config.commands_out);
+        }
+
         // Make the guide
-        return guide.make(demo_file, template, out_dir);
+        return guide.make(config.demo_file, template, config.commands_out);
     }
     
-    // Keep track of errors
-    var errors = [];
-
     // Iterate through command guides
-    for (var i = 0; i < has_guide.length; i++) {
+    for (var i = 0; i < has_data_for_guide.length; i++) {
+        var name = has_data_for_guide[i];
         
         // Find the command dir
-        var command_dir = path.join(commands_dir, has_guide[i]);
+        var command_dir = path.join(config.commands_dir, name);
 
         // Execute the make function above
         var result = make(command_dir);
@@ -99,13 +151,13 @@ function make_command_guides(demo_file, commands_dir,
         // Handle errors
         if (!result.ok)
             errors.push({
-                guide: has_guide[i],
+                guide: name,
                 error_msg: result.error_msg
             });
 
-        if (show_progress) {
+        if (config.show_progress) {
             var symbol = result.ok ? logSymbols.success : logSymbols.error;
-            console.log(" ", symbol, has_guide[i]);
+            console.log(" ", symbol, name);
         }
     }
 
@@ -113,25 +165,25 @@ function make_command_guides(demo_file, commands_dir,
     return errors;
 }
 
-function make_spec_guides(specs_dir, out_dir, show_progress) {
+function make_spec_guides(config) {
+    
+    // Keep track of errors
+    var errors = [];
     
     // Iterate through the commands
-    var specs = fileutil.readdir(specs_dir);
-    if (!specs.ok)
-        return specs;
+    var specs = fileutil.readdir(config.specs_dir);
+    if (!specs.ok) {
+        errors.push({
+            guide: "general",
+            error_msg: specs.error_msg
+        });
+        return errors;
+    }
 
-    // Find the constraints file
-    var constraints_file = path.join(specs_dir, 'constraints.yml');
-    if (!fs.existsSync(constraints_file))
-        return {
-            ok: false,
-            error_msg: "can't find constraint descriptions at spec_dir/constraints.yml"
-        };
-    
     // Filter for commands that have specs and guides, and warn
     // on commands that don't.
     var has_data_for_guide = specs.paths.filter(function(spec) {
-        var dir = path.join(specs_dir, spec);
+        var dir = path.join(config.specs_dir, spec);
 
         // Skip things that aren't specs (constraints.yml)
         var spec_file = path.join(dir, "spec.yml");
@@ -141,26 +193,37 @@ function make_spec_guides(specs_dir, out_dir, show_progress) {
         
         var example_file = path.join(dir, "example.yml");
         if (!fs.existsSync(example_file)) {
-            console.log("!!", "skipping", "'" + spec + "',",
-                        "doesn't have an example");
+            console.log(" ", logSymbols.warning, spec);
             return false;
         }
 
         if (!has_guide(dir)) {
-            console.log("!!", "skipping", "'" + spec + "',",
-                        "doesn't have a guide");
+            console.log(" ", logSymbols.warning, spec);
             return false;
         }
         
         return true;
     });
-
+    
+    // Find the constraints file
+    var constraints_file = path.join(config.specs_dir, 'constraints.yml');
+    if (!fs.existsSync(constraints_file)) {
+        errors.push({
+            guide: "general",
+            error_msg: "can't find constraint descriptions at spec_dir/constraints.yml"
+        });
+        return errors;
+    }
     
     // Load constraint descriptions
     var constraints_result = load_constraints(constraints_file);
-    if (!constraints_result.ok)
-        return constraints_result;
-    
+    if (!constraints_result.ok) {
+        errors.push({
+            guide: "general",            
+            error_msg: constraints_result.error_msg
+        });
+        return errors;
+    }
     var constraints = constraints_result.constraints;
 
     // How to execute the make script in the spec dir
@@ -177,17 +240,15 @@ function make_spec_guides(specs_dir, out_dir, show_progress) {
 
         // Make the guide
         return guide.make(spec_file, example_file,
-                          constraints, template, out_dir);
+                          constraints, template, config.specs_out);
     }
-    
-    // Keep track of errors
-    var errors = [];
 
     // Iterate through command guides
-    for (var i = 0; i < has_guide.length; i++) {
-        
+    for (var i = 0; i < has_data_for_guide.length; i++) {
+        var name = has_data_for_guide[i];
+                
         // Find the spec dir
-        var dir = path.join(specs_dir, has_guide[i]);
+        var dir = path.join(config.specs_dir, name);
 
         // Execute the make function above
         var result = make(dir);
@@ -195,13 +256,13 @@ function make_spec_guides(specs_dir, out_dir, show_progress) {
         // Handle errors
         if (!result.ok)
             errors.push({
-                guide: has_guide[i],
+                guide: name,
                 error_msg: result.error_msg
             });
         
-        if (show_progress) {
+        if (config.show_progress) {
             var symbol = result.ok ? logSymbols.success : logSymbols.error;
-            console.log(" ", symbol, has_guide[i]);
+            console.log(" ", symbol, name);
         }
     }
 
@@ -229,7 +290,7 @@ function has_guide(dir) {
 }
 
 function load_constraints(file) {
-    var yaml_result = fileutil.readYAML(constraints_file);
+    var yaml_result = fileutil.readYAML(file);
     if (!yaml_result.ok)
         return yaml_result;
 
@@ -249,7 +310,7 @@ function load_constraints(file) {
         map.set(constraint.name, constraint.description);
     }
     
-    return map;
+    return { ok: true, constraints: map };
 }
 
 

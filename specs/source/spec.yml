@@ -68,7 +68,6 @@ source:
           doc: List of the original authors of the source code (limit 10)
           constraints:
             - Array
-            - max-size-10
             - non-empty
           content:
             - doc: An author

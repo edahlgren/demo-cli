@@ -17,8 +17,8 @@ function make(spec_file, example_file, constraints,
     return render.render({
         vars: vars,
         template: template,
-        html: path.join(out_dir, "run.html"),
-        text: path.join(out_dir, "run.txt")
+        html: path.join(out_dir, "data.html"),
+        text: path.join(out_dir, "data.txt")
     });
 }
 

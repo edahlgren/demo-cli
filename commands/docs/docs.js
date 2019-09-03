@@ -34,9 +34,6 @@ function exec(args, exit) {
     // Make the docs
     if (config.make) {
 
-        var commands_dir = path.resolve(__dirname, '../');
-        var specs_dir = path.resolve(__dirname, '../../specs');
-        
         var result = make.all({
             // Print success or failure for each doc
             show_progress: true,
@@ -45,11 +42,11 @@ function exec(args, exit) {
             demo_file: './example/shared/demo.yml',
 
             // Path to the commands this CLI supports
-            commands_dir: commands_dir,
+            commands_dir: path.resolve(__dirname, '../'),
             commands_out: './example/docs/guides/commands',
 
             // Paths to the specs sections of the demo file
-            specs_dir: specs_dir,
+            specs_dir: path.resolve(__dirname, '../../specs'),
             specs_out: './example/docs/guides/specs'
         });
         
