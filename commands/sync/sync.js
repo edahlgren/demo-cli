@@ -27,8 +27,15 @@ function exec(args, exit) {
 
     // Handle help
     if (cli.help(args)) {
-        docs.asyncLess('/demo/docs/guides/sync.txt');
+        
+        // Does the guide exist?
+        var guide = docs.path({ name: "sync", command: true });
+        if (!guide.ok)
+            exit(1, guide.error_msg);
+        
+        docs.asyncLess(guide.path, exit);
     }
+
     // Handle the command
     else {
         

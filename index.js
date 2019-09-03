@@ -43,11 +43,15 @@ function main() {
         args.help = false;
     }
 
-    // Handle help
+    // Default to showing help
+    if (!args.command && !args.help)
+        args.help = true;
+
+    // Show help
     if (args.help)
-        handleHelp(demofile.isInsideDemo());
+        handleHelp();
     
-    // Handle a command
+    // Handle command
     else
         handleCommand(args.command, argv);
 }
@@ -57,12 +61,28 @@ function main() {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-function handleHelp(inDemo) {
-    if (!inDemo) {
+function exit(code, msg) {
+    if (msg && code > 0) {
+        console.error("\n" + msg);
+    }
+    if (msg && code == 0) {
+        console.log("\n" + msg);
+    }
+    process.exit(code);
+}
+
+function handleHelp() {
+    if (!demofile.isInsideDemo()) {
         console.log("not implemented");
         exit(1);
     }
-    docs.asyncLess('/demo/docs/guides/help.txt');
+    
+    // Does the guide exist?
+    var guide = docs.path({ name: "help", command: true });
+    if (!guide.ok)
+        exit(1, guide.error_msg);
+    
+    docs.asyncLess(guide.path, exit);
 }
 
 function handleCommand(command, argv) {
@@ -120,14 +140,4 @@ function handleCommand(command, argv) {
     default:
         exit(1, "command '" + command + "' not implemented");
     }
-}
-
-function exit(code, msg) {
-    if (msg && code > 0) {
-        console.error("\n" + msg);
-    }
-    if (msg && code == 0) {
-        console.log("\n" + msg);
-    }
-    process.exit(code);
 }

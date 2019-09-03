@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const logSymbols = require('log-symbols');
 
+const docs = require('../docs/docs');
 const fileutil = require('../../util/file.js');
 const demofile = require('../../util/demofile.js');
 
@@ -13,14 +14,13 @@ const check = require('./check.js');
 
 
 const cli = [
+    { name: 'help', alias: 'h', type: Boolean },
+    
     { name: 'section', defaultOption: true },
     { name: 'check', type: Boolean },
     
     { name: 'demofile' },
-    { name: 'specdir' },
-    
-    { name: 'verbose', alias: 'v', type: Boolean },
-    { name: 'help', alias: 'h', type: Boolean }
+    { name: 'specdir' }
 ];
 
 
@@ -42,16 +42,29 @@ function exec(args, exit) {
     if (!config.ok)
         exit(1, config.error_msg);
 
+    // Check the configuration?
     if (config.check) {
+        // Yes, handle running the configuration check        
         var check_result = execCheck(config);
         if (!check_result.ok)
             exit(1, check_result.error_msg);
-        
         exit(0);
     }
 
-    console.log("not implemented");
-    exit(1);
+    // No, find the path to a guide to show instead
+    var path_config = {
+        name: (config.section ? config.section : "configure"),
+        spec: config.section,
+        command: !config.section
+    };
+
+    // Does the guide exist?
+    var guide = docs.path(path_config);
+    if (!guide.ok)
+        exit(1, guide.error_msg);
+        
+    // Yes, show it
+    docs.asyncLess(guide.path, exit);
 }
 
 
@@ -61,9 +74,15 @@ function exec(args, exit) {
 function parseArgs(args) {
 
     // Parse simple options first
-    var needsCheck = (args.hasOwnProperty('check') && args.check);
     var hasSection = args.hasOwnProperty('section');
-    var verbose = args.hasOwnProperty('verbose');
+    var help = (args.hasOwnProperty('help') && args.help);
+    var needsCheck = (args.hasOwnProperty('check') && args.check);
+
+    if (help && needsCheck)
+        return {
+            ok: false,
+            error_msg: "can't use --help and --check together, choose one"
+        };
 
     
     // Doesn't need check so just pass on the section (if given)
@@ -72,10 +91,7 @@ function parseArgs(args) {
         if (!hasSection)
             return { ok: true };
         
-        return {
-            ok: true,
-            section: args.section
-        };
+        return { ok: true, section: args.section };
     }
 
     
@@ -88,39 +104,74 @@ function parseArgs(args) {
             error_msg: "demo file '" + demo_file + "' doesn't exist"
         };
 
-    
-    // Needs check, so find at least 1 spec
-    var spec_dir = (args.hasOwnProperty('specdir') ? args.specdir
-                    : (demofile.isInsideDemo() ? "/demo/specs" : ""));
-    if (!fs.existsSync(spec_dir))
-        return {
-            ok: false,
-            error_msg: "spec directory '" + spec_dir + "' doesn't exist"
-        };
-                   
-    var readdir_result = fileutil.readdir(spec_dir);
-    if (!readdir_result.ok)
-        return readdir_result;
-    
-    if (readdir_result.paths.length == 0)
-        return {
-            ok: false,
-            error_msg: "spec directory has no files"
-        };
 
-    var spec_files = readdir_result.paths.filter(function(p) {
-        return path.extname(p) === '.yml';
-    });
-    if (spec_files.length == 0)
-        return {
-            ok: false,
-            error_msg: "spec directory has no specs"
-        };
-    
-    spec_files = spec_files.map(function(file) {
-        return path.join(spec_dir, file);
-    });
+    // Gather spec files
+    var spec_files = [];
 
+    if (args.hasOwnProperty('specdir')) {
+        let spec_dir = args.specdir;
+        if (!fs.existsSync(spec_dir))
+            return {
+                ok: false,
+                error_msg: "spec directory '" + spec_dir + "' doesn't exist"
+            };
+
+        let readdir_result = fileutil.readdir(spec_dir);
+        if (!readdir_result.ok)
+            return readdir_result;
+        
+        if (readdir_result.paths.length == 0)
+            return {
+                ok: false,
+                error_msg: "spec directory has no files"
+            };
+        
+        spec_files = readdir_result.paths.filter(function(p) {
+            return path.extname(p) === '.yml';
+        });
+        
+        if (spec_files.length == 0)
+            return {
+                ok: false,
+                error_msg: "spec directory has no specs"
+            };
+        
+        spec_files = spec_files.map(function(file) {
+            return path.join(spec_dir, file);
+        });
+        
+    } else {
+        
+        let spec_dir = path.resolve(__dirname, '../../specs');
+
+        var readdir_result = fileutil.readdir(spec_dir);
+        if (!readdir_result.ok)
+            return readdir_result;
+
+        if (readdir_result.paths.length == 0)
+            return {
+                ok: false,
+                error_msg: "standard spec directory has no subdirectories"
+            };
+        
+        spec_files = readdir_result.paths.filter(function(dir) {
+            if (dir === "constraints.yml")
+                return false;
+            
+            return fs.existsSync(spec_dir, path.join(dir, 'spec.yml'));
+        });
+        
+        if (spec_files.length == 0)
+            return {
+                ok: false,
+                error_msg: "standard spec directory has no specs"
+            };
+
+        spec_files = spec_files.map(function(dir) {
+            return path.join(spec_dir, path.join(dir, 'spec.yml'));
+        });
+    }
+    
 
     // Make sure there's a spec file that refers the section
     if (hasSection) {
@@ -152,8 +203,7 @@ function parseArgs(args) {
         ok: true,
         check: true,
         demofile: demo_file,
-        specs: spec_files,
-        verbose: verbose
+        specs: spec_files
     };
 }
 
@@ -205,15 +255,8 @@ function execCheck(config) {
         var demo_section = {};
         demo_section[key] = demo[key];
 
-        // Print progress
-        if (config.verbose) {
-            var prefix = (first ? "" : "\n");
-            console.log(prefix + "  checking", "'" + key + "'");
-        }
-
         // Try to match parts of the spec with parts of the section
-        var parse_result = parse.do_parse(demo_section, spec,
-                                          config.verbose);
+        var parse_result = parse.do_parse(demo_section, spec, true);
         if (!parse_result.ok) {
 
             console.log(" ", logSymbols.error, demo_section);
@@ -225,8 +268,7 @@ function execCheck(config) {
         }
 
         // Run checks
-        var check_result = check.do_check(parse_result.data,
-                                          config.verbose);
+        var check_result = check.do_check(parse_result.data, true);
         if (!check_result.ok) {
             console.log(" ", logSymbols.error, key);
             errors.push({
@@ -275,9 +317,9 @@ function execCheck(config) {
                 section: key,
                 error_msgs: error_msgs
             });
-            console.log(" ", logSymbols.error, key);
+            console.log(" ", logSymbols.error, key, "\n");
         } else {
-            console.log(" ", logSymbols.success, key);
+            console.log(" ", logSymbols.success, key, "\n");
         }
             
         first = false;

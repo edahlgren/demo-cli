@@ -10,6 +10,13 @@ const make = require('./make.js');
 ////////////////////////////////////////////////////////////////////////////////
 
 
+const command_guides_dir = '/demo/docs/guides/commands';
+const spec_guides_dir = '/demo/docs/guides/specs';
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 function exec(args, exit) {
     'use strict';
 
@@ -39,15 +46,15 @@ function exec(args, exit) {
             show_progress: true,
 
             // Path to the current configuration
-            demo_file: './example/shared/demo.yml',
+            demo_file: '/demo/demo.yml',
 
             // Path to the commands this CLI supports
             commands_dir: path.resolve(__dirname, '../'),
-            commands_out: './example/docs/guides/commands',
+            commands_out: command_guides_dir,
 
             // Paths to the specs sections of the demo file
             specs_dir: path.resolve(__dirname, '../../specs'),
-            specs_out: './example/docs/guides/specs'
+            specs_out: spec_guides_dir
         });
         
         if (!result.ok)
@@ -55,15 +62,46 @@ function exec(args, exit) {
         
         exit(0);
     }
-    
+
+    // Does the guide exist?
+    var guide = guide_path({ name: "docs", command: true });
+    if (!guide.ok)
+        exit(1, guide.error_msg);
     
     // Show the high-level docs guide
-    asyncLess('/demo/docs/guides/docs.txt', exit);
+    asyncLess(guide.path, exit);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
+function guide_path(config) {
+    if (config.command) {
+        let p = path.join(command_guides_dir, config.name + ".txt");
+        if (!fs.existsSync(p)) {
+            return {
+                ok: false,
+                error_msg: "guide for command '" + config.name + "' doesn't exist"
+            };
+        }
+        return { ok: true, path: p };
+    }
+    if (config.spec) {
+        let p = path.join(spec_guides_dir, config.name + ".txt");
+        if (!fs.existsSync(p)) {
+            return {
+                ok: false,
+                error_msg: "guide for configuration section '" + config.name + "' doesn't exist"
+            };
+        }
+        return { ok: true, path: p };
+    }
+    return {
+        ok: false,
+        error_msg: "need to specify either a command or spec guide"
+    };
+}
 
 function asyncLess(file, exit) {
     if (!fs.existsSync(file))
@@ -104,5 +142,6 @@ function asyncLess(file, exit) {
 module.exports = {
     spec: cli.spec,
     exec: exec,
+    path: guide_path,
     asyncLess: asyncLess
 };

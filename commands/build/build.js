@@ -27,8 +27,15 @@ function exec(args, exit) {
 
     // Handle help
     if (cli.help(args)) {
-        docs.asyncLess('/demo/docs/guides/build.txt');
+
+        // Does the guide exist?
+        var guide = docs.path({ name: "build", command: true });
+        if (!guide.ok)
+            exit(1, guide.error_msg);
+        
+        docs.asyncLess(guide.path, exit);
     }
+    
     // Handle the command
     else {
         
@@ -56,7 +63,6 @@ function exec(args, exit) {
         // quickly. Because we execute the script asynchronously, we also need
         // to pass exit through to be called when the process exits.
         asyncBuild(config, exit);
-        
     }
 }
 
