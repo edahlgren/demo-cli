@@ -1,6 +1,6 @@
-# (sync) -
+# sync
 
-Rsync a local directory to a directory in the demo
+Rsync from localhost to the demo
 
 ## Quick reference
 

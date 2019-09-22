@@ -1,0 +1,292 @@
+<!-- Doc content -->
+<div class="doc">
+
+  <!-- Command title and short description -->
+  <h1 class="mb-0.25" id="title">demo run</h1>
+
+  <p>Run the demo using a built-in script or your choice of command line options</p>
+
+  <h2 class="mt-2">Examples</h2>
+
+  <pre><code>$ demo run
+</code></pre>
+
+  <pre class="output"><code>[Built-in scripts]
+      
+djibouti      Find the shortest roundtrip through Djibouti (5s)
+qatar         Find the shortest roundtrip through Qatar (5s)
+luxembourg    Find the shortest roundtrip through Luxembourg (5s)
+</code></pre>
+
+  <pre class="mt-2"><code>$ demo run djibouti
+</code></pre>
+      
+  <pre class="output"><code>[Command line]
+
+/root/src/acotsp \
+    -i /root/data/djibouti/dj38.tsp \
+    --mmas \
+    --tries 1 \
+    --time 5
+          
+[Logs]
+
+starting try 1 ...
+...
+</code></pre>
+
+  <pre class="mt-2"><code>$ demo run -i /root/data/djibouti/dj38.tsp
+</code></pre>
+  
+  <pre class="output"><code>[Command line]
+
+/root/src/acotsp \
+    -i /root/data/djibouti/dj38.tsp
+          
+[Logs]
+
+starting try 1 ...
+</code></pre>
+  
+  <h2 class="mt-2">Command line options</h2>
+
+  <div class="subtitle">Choose one</div>
+  <table class="wrap">
+    <tbody>
+      <tr>
+        <td class="inline-code nowrap">--mmas, -x</td>
+        <td><div class="align-left label red pr-0.5">D</div></td>
+        <td>Use the MAX-MIN Ant System</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--as, -u</td>
+        <td></td>
+        <td>Use the Basic Ant System</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--eas, -v</td>
+        <td></td>
+        <td>Use the Elitist Ant System</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--ras, -w</td>
+        <td></td>
+        <td>Use the Rank-based Ant System</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--acs, -z</td>
+        <td></td>
+        <td>Use the Ant Colony System</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--bwas, -y</td>
+        <td></td>
+        <td>Use the Best-worst Ant System</td>
+      </tr>
+    </tbody>
+  </table>
+      
+  <div class="mt-2 subtitle">Choose any</div>
+  <table class="wrap">
+    <tbody>
+      <tr>
+        <td class="inline-code nowrap">--tsplibfile, -i</td>
+        <td><div class="label light-blue pr-0.5">ND</div></td>
+        <td>Path to a <a href="https://wwwproxy.iwr.uni-heidelberg.de/groups/comopt/software/TSPLIB95/tsp95.pdf">TSPLIB</a> formatted file</td>
+      </tr>
+      <tr class="hspace-1"></tr>
+      <tr>
+        <td class="inline-code nowrap">--tries, -r</td>
+        <td></td>
+        <td>Number of independent trials</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--tours, -s</td>
+        <td></td>
+        <td>Number of steps in each trial</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--time, -t</td>
+        <td></td>
+        <td>Maximum time for each trial in seconds</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--seed</td>
+        <td></td>
+        <td>Seed for the internal random number generator</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--optimum, -o</td>
+        <td></td>
+        <td>Stop if solution is better or equal to this number (lower is better)</td>
+      </tr>
+      <tr class="hspace-1"></tr>
+      <tr>
+        <td class="inline-code nowrap">--ants, -m</td>
+        <td></td>
+        <td>Number of ants (ant colony size)</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--nnants, -g</td>
+        <td></td>
+        <td>Number of ants that can communicate with each other</td>
+      </tr>
+      <tr class="hspace-1"></tr>
+      <tr>
+        <td class="inline-code nowrap">--alpha, -a</td>
+        <td></td>
+        <td>Influence of pheromone trails</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--beta, -b</td>
+        <td></td>
+        <td>Influence of heuristic information</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--rho, -e</td>
+        <td></td>
+        <td>Pheromone trail evaporation rate</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--q0, -q</td>
+        <td></td>
+        <td>Probability of finding the best solution</td>
+      </tr>
+      <tr class="hspace-1"></tr>
+      <tr>
+        <td class="inline-code nowrap">--elitistants, -c</td>
+        <td></td>
+        <td>Number of elitist ants (with --eas only)</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--rasranks, -f</td>
+        <td></td>
+        <td>Number of ranks (with --ras only)</td>
+      </tr>
+      <tr class="hspace-1"></tr>
+      <tr>
+        <td class="inline-code nowrap">--localsearch, -l</td>
+        <td></td>
+        <td>Configure local search</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--nnls, -k</td>
+        <td></td>
+        <td>Number of ants in a neighborhood for local search</td>
+      </tr>
+      <tr>
+        <td class="inline-code nowrap">--dlb, -d</td>
+        <td><div class="align-left label red pr-0.5">D</div></td>
+        <td>Use don't look bits in local search</td>
+      </tr>
+      <tr class="hspace-1"></tr>
+      <tr>
+        <td class="inline-code nowrap">--quiet</td>
+        <td></td>
+        <td>Reduce output to a minimum</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <table class="legend underhang">
+    <tr>
+      <td><span class="label red">D</span></td>
+      <td>=</td>
+      <td>Used by default when no options specified</td>
+    </tr>
+    <tr>
+      <td><span class="label light-blue">ND</span></td>
+      <td>=</td>
+      <td>No default value, you must specify one</td>
+    </tr>
+  </table>
+
+  <!-- command line examples -->
+  
+  <div class="mt-1 subtitle">Examples</div>
+  
+  <pre id="e1"><code>$ demo run -i /root/data/djibouti/dj38.tsp --eas
+</code></pre>
+
+  <pre class="mt-1" id="e2"><code>$ demo run -i /root/data/qatar/qa194.tsp --time 20
+</code></pre>
+
+  <pre class="mt-1" id="e3"><code>$ demo run -i /root/data/djibouti/dj38.tsp --ants 100
+</code></pre>
+
+  <pre class="mt-1" id="e4"><code>$ demo run -i /root/data/luxembourg/lu980.tsp --as --nnants 40
+</code></pre>
+
+  <!-- gutter labels for command line examples -->
+  <div class="hidden">
+    <p id="gutter-e1">Use the Elitist Ant System algorithm to solve Djibouti</p>
+    <p id="gutter-e2">Spend 20 seconds solving Qatar</p>
+    <p id="gutter-e3">Use 100 ants to solve Djibouti</p>
+    <p id="gutter-e4">Use the Basic Ant System and allow each ant to share information with its nearest 40 neighbors to solve Luxembourg</p>
+  </div>
+
+  <h2 class="mt-3">Included test data</h2>
+
+  <table>
+    <tbody>
+      <tr>
+        <td>
+          <span class="label light-blue">&bull;</span>
+          <span class="pr-0.5 label red">&bull;</span>
+        </td>
+        <td class="inline-code">/root/data/djibouti/dj38.tsp</td>
+        <td>Contains points representing cities in Djibouti (Africa)</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="label light-blue">&bull;</span>
+          <span class="pr-0.5 label red">&bull;</span>
+        </td>
+        <td class="inline-code">/root/data/qatar/qa194.tsp</td>
+        <td>Contains points representing cities in Qatar (Middle East)</td>
+      </tr>
+      <tr>
+        <td>
+          <span class="label light-blue">&bull;</span>
+          <span class="pr-0.5 label red">&bull;</span>
+        </td>
+        <td class="inline-code">/root/data/luxembourg/lu980.tsp</td>
+        <td>Contains points representing cities in Luxembourg (Europe)</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <table class="legend underhang">
+    <tr>
+      <td><span class="label light-blue">&bull;</span></td>
+      <td>=</td>
+      <td>From <a href="http://www.math.uwaterloo.ca/tsp/world/countries.html">National Traveling Salesman Problems</a> provided by the University of Waterloo. This source contains data on 25 countries, with as few cities as 29 all the way to 71,009</td>
+    </tr>
+    <tr>
+      <td><span class="label red">&bull;</span></td>
+      <td>=</td>
+      <td>Formatted as a <a href="https://wwwproxy.iwr.uni-heidelberg.de/groups/comopt/software/TSPLIB95/tsp95.pdf">TSPLIB</a> file</td>
+    </tr>
+  </table>
+  
+  <h2 class="mt-2">Stuck?</h2>
+
+  <p>Conveniently, you can print whatever <span class="em">would</span> be executed by <span class="inline-code">demo run</span> by adding <span class="inline-code">--dry-run</span>:</p>
+
+  <pre><code>$ demo run djibouti --dry-run
+</code></pre>
+
+  <pre class="output"><code>/root/src/acotsp -i /root/data/djibouti/dj38.tsp --mmas --tries 1 --time 5
+</code></pre>
+
+  <pre id="e1"><code>$ demo run -i /root/data/djibouti/dj38.tsp --eas
+</code></pre>
+
+  <pre class="output"><code>/root/src/acotsp -i /root/data/djibouti/dj38.tsp --eas
+</code></pre>
+
+  <p>
+    This way you can wrap the command line in a debugger, profiler, tracer, or any other tool you prefer. If the demo isn't producing the output you expect, try adding log statements to the <a href="">main loop</a>. If you're unsure how to go about changing the demo, read the <a href="">guide</a>.
+  </p>
+  
+</div>

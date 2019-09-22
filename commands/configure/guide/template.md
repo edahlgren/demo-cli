@@ -1,4 +1,6 @@
-# (configure help) - Configure the demo
+# configure
+
+Configure the demo
 
 ## Quick reference
 

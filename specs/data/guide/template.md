@@ -1,6 +1,6 @@
-# (configure data) -
+# data
 
-Configure the 'data' section of this demo
+Included data sets
 
 ## Quick reference
 
@@ -18,7 +18,7 @@ $ demo configure data --check
 
 ## Summary
 
-The data section contains information about included datasets that are compatible with the demo, for executing a number of experiments.
+The data section contains information about included data sets that are compatible with the demo, for executing a number of experiments.
 
 ## Requirements
 

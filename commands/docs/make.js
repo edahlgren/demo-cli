@@ -1,8 +1,12 @@
 const fs = require('fs');
+const fsExtra = require('fs-extra');
 const path = require('path');
+
 const logSymbols = require('log-symbols');
+const mustache = require('mustache');
 
 const fileutil = require('../../util/file.js');
+const demofile = require('../../util/demofile');
 const render = require('./render');
 
 
@@ -11,6 +15,10 @@ const render = require('./render');
 
 function make_all(config) {
 
+    // Make sure output directories exist
+    fsExtra.ensureDirSync(config.commands_out);
+    fsExtra.ensureDirSync(config.specs_out);
+    
     console.log("");
     console.log(" Making general help ...");
     console.log("");
@@ -22,7 +30,7 @@ function make_all(config) {
     console.log("");
 
     var command_errors = make_command_guides(config);
-    
+        
     console.log("");
     console.log(" Making configuration guides ...");
     console.log("");
@@ -46,28 +54,39 @@ function make_all(config) {
     return { ok: true };
 }
 
+// Temporarily just make the html guides. It's easier to debug
+// them this way
+
 function make_toplevel_guide(config) {
-    var result = render.render({
-        // General render options
-        vars: {},
-        template: path.join(config.commands_dir, "help.md"),
-        html: path.join(config.commands_out, "help.html"),
-        text: path.join(config.commands_out, "help.txt")
-    }, {
-        // Text rendering options
-        indentWrapTable: false,
-        minColumnPad: 5
+    var demo = demofile.parse(config.demo_file, []);
+    if (!demo.ok)
+        return demo;
+
+    let template_file = path.join(config.commands_dir, "help.html");
+    let template = fileutil.readContent(template_file);
+    if (!template.ok)
+        return template;
+    
+    let html = mustache.render(template.content, {
+        title: demo.title,
+        description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+        download_path: "dm/ant-colony-search"
     });
 
+    let html_file = path.join(config.commands_out, "help.html");
+    var write_result = fileutil.writeContent(html_file, html);
+    if (!write_result.ok)
+        return write_result;
+    
     if (config.show_progress) {
-        var symbol = result.ok ? logSymbols.success : logSymbols.error;
+        var symbol = write_result.ok ? logSymbols.success : logSymbols.error;
         console.log(" ", symbol, "general help");
     }
     
-    if (!result.ok)
+    if (!write_result.ok)
         return [{
             guide: "help",
-            error_msg: result.error_msg
+            error_msg: write_result.error_msg
         }];
 
     return [];

@@ -2,10 +2,28 @@ const path = require('path');
 
 const render = require('../../docs/render');
 const demofile = require('../../../util/demofile');
+const fileutil = require('../../../util/file.js');
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
+function make2(demo_file, template, out_dir) {
+
+    console.log("out dir", out_dir);
+    
+    let template_file = path.resolve(__dirname, 'template.html');
+    let html_template = fileutil.readContent(template_file);
+    if (!html_template.ok)
+        return template;
+    
+    return render.html_only({
+        vars: {},
+        template: html_template.content,
+        html: path.join(out_dir, "run.html"),
+        text: path.join(out_dir, "run.txt")
+    });        
+}
 
 function make(demo_file, template, out_dir) {
     
@@ -136,5 +154,5 @@ const checks = [
 
 
 module.exports = {
-    make: make
+    make: make2
 };

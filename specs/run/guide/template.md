@@ -1,6 +1,6 @@
-# (configure run) -
+# run
 
-Configure the 'run' section of this demo
+Run scripts
 
 ## Quick reference
 

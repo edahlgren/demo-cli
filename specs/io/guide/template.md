@@ -1,6 +1,6 @@
-# (configure io) -
+# io
 
-Configure the 'io' section of this demo
+Input and output files
 
 ## Quick reference
 

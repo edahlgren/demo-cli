@@ -1,6 +1,6 @@
-# (configure papers) -
+# papers
 
-Configure the 'papers' section of this demo
+Research papers and reports
 
 ## Quick reference
 

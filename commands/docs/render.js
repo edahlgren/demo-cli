@@ -31,6 +31,18 @@ const default_text_options = {
     minColumnPad: 2
 };
 
+function renderHTMLOnly(config) {
+    let html = mustache.render(config.template, config.vars);
+    
+    // HTML -> file
+    var write_result = fileutil.writeContent(config.html, html);
+    if (!write_result.ok)
+        return write_result;
+    
+    // Successfully rendered and wrote all docs
+    return { ok: true };
+}
+
 function render(config, text_options) {
 
     // Markdown template -> markdown
@@ -599,5 +611,6 @@ function tableToLines(table, options) {
 
 
 module.exports = {
-    render: render
+    render: render,
+    html_only: renderHTMLOnly
 };

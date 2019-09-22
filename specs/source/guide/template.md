@@ -1,6 +1,6 @@
-# (configure source) -
+# source
 
-Configure the 'source' section of this demo
+Source code
 
 ## Quick reference
 

@@ -1,6 +1,6 @@
-# (run) - 
+# run
 
-Execute the main binaries and scripts of this demo
+Run the demo
 
 ## Quick reference
 

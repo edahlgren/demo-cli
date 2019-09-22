@@ -1,6 +1,6 @@
-# (build) - 
+# build
 
-Build the source code included in this demo
+Rebuild the source code
 
 ## Quick reference
 

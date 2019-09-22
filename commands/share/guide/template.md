@@ -1,6 +1,6 @@
-# (share) -
+# share
 
-Rsync a directory inside the demo to a local directory
+Rsync from the demo to localhost
 
 ## Quick reference
 

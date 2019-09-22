@@ -10,22 +10,8 @@ const make = require('./make.js');
 ////////////////////////////////////////////////////////////////////////////////
 
 
-const command_guides_dir = '/demo/docs/guides/commands';
-const spec_guides_dir = '/demo/docs/guides/specs';
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
 function exec(args, exit) {
-    'use strict';
-
-    
-    // This command doesn't work inside a demo shell
-    if (false && !demofile.isInsideDemo()) {
-        exit(1, "Can't run 'demo docs' from outside of a demo shell");
-    }
-
+    'use strict';    
     
     // Parse the configuration from the command-line arguments
     //
@@ -40,21 +26,20 @@ function exec(args, exit) {
 
     // Make the docs
     if (config.make) {
-
         var result = make.all({
             // Print success or failure for each doc
             show_progress: true,
 
             // Path to the current configuration
-            demo_file: '/demo/demo.yml',
+            demo_file: config.demofile,
 
             // Path to the commands this CLI supports
             commands_dir: path.resolve(__dirname, '../'),
-            commands_out: command_guides_dir,
+            commands_out: config.commands_out,
 
             // Paths to the specs sections of the demo file
             specs_dir: path.resolve(__dirname, '../../specs'),
-            specs_out: spec_guides_dir
+            specs_out: config.specs_out
         });
         
         if (!result.ok)
@@ -63,6 +48,11 @@ function exec(args, exit) {
         exit(0);
     }
 
+    // Showing docs doesn't work inside a demo shell
+    if (!demofile.isInsideDemo()) {
+        exit(1, "Can't run 'demo docs' from outside of a demo shell");
+    }
+    
     // Does the guide exist?
     var guide = guide_path({ name: "docs", command: true });
     if (!guide.ok)

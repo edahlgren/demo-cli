@@ -1,6 +1,6 @@
-# (configure args) -
+# args
 
-Configure the 'args' section of this demo
+Command line arguments
 
 ## Quick reference
 

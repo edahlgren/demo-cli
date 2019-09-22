@@ -1,6 +1,6 @@
-# (docs) -
+# docs
 
-Find and generate documentation about this demo
+Find and generate documentation
 
 ## Quick reference
 

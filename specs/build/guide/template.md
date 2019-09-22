@@ -1,6 +1,6 @@
-# (configure build) -
+# build
 
-Configure the 'build' section of this demo
+Build scripts
 
 ## Quick reference
 

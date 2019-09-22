@@ -1,6 +1,6 @@
-# (configure title) -
+# title
 
-Configure the 'title' section of this demo
+Demo title
 
 ## Quick reference
 
