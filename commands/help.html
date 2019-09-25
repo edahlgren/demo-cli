@@ -1,145 +1,153 @@
-<!-- Doc content -->
+<!-- doc content -->
 <div class="doc">
 
-  <!-- Demo title -->
-  <h1 id="title">Guide to {{title}}</h1>
+  <div class="section">            <!-- 100% of non-nav -->
+    <div class="middle-container"> <!-- 66% of 75% = 50% of body -->
+      <div class="middle-content"> <!-- content 650px centered -->
+        
+        <!-- Demo title -->
+        <h1 id="title">Guide to {{title}}</h1>
 
-  <!-- Demo short description -->
-  <p>
-    The <span class="inline-code">ant colony search</span> demo solves the traveling salesman problem using an artificial colony of ants. The traveling salesman problem is to find the shortest roundtrip through a region, visiting every city and town. For example:
-  </p>
+        <!-- Demo short description -->
+        <p>
+          The ant colony search demo solves the traveling salesman problem using an artificial colony of ants. The traveling salesman problem is to find the shortest roundtrip through a region, visiting every city and town. For example:
+        </p>
 
-  <table class="img-grid">
-    <tbody>
-      <tr>
-        <td>
-          <div class="under-img">Luxembourg<br/>634 cities</div>
-          <img class="grid-img" src="/assets/images/luxembourg_with_cities.png" />
-        </td>
-        <td>
-          <div class="under-img">Nicaragua<br/>2373 cities</div>
-          <img class="grid-img" src="/assets/images/nicaragua_with_cities.png" />
-        </td>
-        <td>
-          <div class="under-img">Greece<br/>9882 cities</div>
-          <img class="grid-img" src="/assets/images/greece_with_cities.png" />
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <img class="grid-img" src="/assets/images/luxembourg_with_tour.png" />
-        </td>
-        <td>
-          <img class="grid-img" src="/assets/images/nicaragua_with_tour.png" />
-        </td>
-        <td>
-          <img class="grid-img" src="/assets/images/greece_with_tour.png" />
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        <table class="img-grid">
+          <tbody>
+            <tr>
+              <td>
+                <div class="under-img">Luxembourg<br/>634 cities</div>
+                <img class="grid-img" src="/assets/images/luxembourg_with_cities.png" />
+              </td>
+              <td>
+                <div class="under-img">Nicaragua<br/>2373 cities</div>
+                <img class="grid-img" src="/assets/images/nicaragua_with_cities.png" />
+              </td>
+              <td>
+                <div class="under-img">Greece<br/>9882 cities</div>
+                <img class="grid-img" src="/assets/images/greece_with_cities.png" />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <img class="grid-img" src="/assets/images/luxembourg_with_tour.png" />
+              </td>
+              <td>
+                <img class="grid-img" src="/assets/images/nicaragua_with_tour.png" />
+              </td>
+              <td>
+                <img class="grid-img" src="/assets/images/greece_with_tour.png" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-  <p>
-     In the demo, artificial ants act like the traveling salesmen. As they explore various paths, the ant share information with their nearest neighbors, so as a collaborative swarm they all quickly find the best path.
-  </p>
+        <p>
+          In the demo, artificial ants act like the traveling salesmen. As they explore various paths, the ant share information with their nearest neighbors, so as a collaborative swarm they all quickly find the best path.
+        </p>
   
-  <!-- Demo layout -->
-  <h2 class="mt-2" id="layout-of-the-demo">Layout of the demo</h2>
-
-  <!-- These could also be links to the source,
-       and since that adds more context, it's probably
-       a good idea -->
-  <table>
-    <tbody>
-      <tr>
-        <td><div class="label light-blue pr-0.5">&bull;</div></td>
-        <td class="inline-code">/root</td>
-        <td class="pl-4 ">Home directory</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="inline-code">/root/data</td>
-        <td class="pl-4 ">Data sets</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="inline-code">/root/help</td>
-        <td class="pl-4 ">Help guides</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="inline-code">/root/src</td>
-        <td class="pl-4 ">Source code</td>
-      </tr>
-      <tr class="hspace-1"></tr>
-      <tr>
-        <td><span class="label red pr-0.5">&bull;</span></td>
-        <td class="inline-code">/shared</td>
-        <td class="pl-4 ">This directory can be synchronized with a local directory outside of the demo, so you can edit files using your own tools</td>
-      </tr>
-      <tr class="hspace-1"></tr>
-      <tr>
-        <td></td>
-        <td class="inline-code">/demo</td>
-        <td class="pl-4 ">Contains scripts for installing, building, and running the demo</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td class="inline-code">/demo/demo.yml</td>
-        <td class="pl-4 ">Configuration file</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <table class="legend underhang">
-    <tr>
-      <td><span class="label light-blue">&bull;</span></td>
-      <td>=</td>
-      <td>In the demo you are the root user with root permissions</td>
-    </tr>
-    <tr>
-      <td><span class="label red">&bull;</span></td>
-      <td>=</td>
-      <td>Learn how with the <a href="/commands/share.html" class="inline-code">share</a> command</td>
-    </tr>
-  </table>
-  <!-- end of Demo layout -->
+        <!-- Demo layout -->
+        <h2 class="mt-2" id="layout-of-the-demo">Layout of the demo</h2>
+        
+        <!-- These could also be links to the source,
+             and since that adds more context, it's probably
+             a good idea -->
+        <table>
+          <tbody>
+            <tr>
+              <td><div class="label light-blue pr-0.5">&bull;</div></td>
+              <td class="inline-code">/root</td>
+              <td class="pl-4 ">Home directory</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="inline-code">/root/data</td>
+              <td class="pl-4 ">Data sets</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="inline-code">/root/help</td>
+              <td class="pl-4 ">Help guides</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="inline-code">/root/src</td>
+              <td class="pl-4 ">Source code</td>
+            </tr>
+            <tr class="hspace-1"></tr>
+            <tr>
+              <td><span class="label red pr-0.5">&bull;</span></td>
+              <td class="inline-code">/shared</td>
+              <td class="pl-4 ">This directory can be synchronized with a local directory outside of the demo, so you can edit files using your own tools</td>
+            </tr>
+            <tr class="hspace-1"></tr>
+            <tr>
+              <td></td>
+              <td class="inline-code">/demo</td>
+              <td class="pl-4 ">Contains scripts for installing, building, and running the demo</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td class="inline-code">/demo/demo.yml</td>
+              <td class="pl-4 ">Configuration file</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <table class="legend underhang">
+          <tr>
+            <td><span class="label light-blue">&bull;</span></td>
+            <td>=</td>
+            <td>In the demo you are the root user with root permissions</td>
+          </tr>
+          <tr>
+            <td><span class="label red">&bull;</span></td>
+            <td>=</td>
+            <td>Learn how with the <a href="/commands/share.html" class="inline-code">share</a> command</td>
+          </tr>
+        </table>
+        <!-- end of Demo layout -->
   
-  <!-- First time guide -->
-  <h2 class="mt-1.5" id="first-time-guide">First time guide</h2>
-
-  <h3>Enter the demo</h3>
-  <p>
-    The easiest way to experiment with the demo is inside the "demo shell", a terminal environment with everything needed by the demo already installed. First install the <a class="inline-code" href="">demo</a> command line tool. Then execute this command to enter the demo and get access to the shell:
-  </p>
-
-  <pre><code>$ demo shell {{download_path}}
+        <!-- First time guide -->
+        <h2 class="mt-1.5" id="first-time-guide">First time guide</h2>
+        
+        <h3>Enter the demo</h3>
+        <p>
+          The easiest way to experiment with the demo is inside the "demo shell", a terminal environment with everything needed by the demo already installed. First install the <a class="inline-code" href="">demo</a> command line tool. Then execute this command to enter the demo and get access to the shell:
+        </p>
+        
+        <pre><code>$ demo shell {{download_path}}
 </code></pre>
+        
+        <div class="mt-2 flex">
+          <div>
+            <h3>Try it</h3>
+            <p>
+              Try each of the <a href="">configured run scripts</a> to test what the demo can do. Then try changing the behavior of the demo by using different <a href="">command line options</a> and <a href="">input data</a>.
+            </p>
+          </div>
+          <div class="vspace"></div>
+          <div>
+            <h3>Dig deeper</h3>
+            <p>
+              Once you've seen what the demo can do, you can learn how it works by reading its <a href="">documentation</a>, <a href="">research papers</a>, and <a href="">source code</a>. You can also <a href="">change the source code</a> to test out new ideas.
+            </p>
+          </div>
+        </div>
+        <!-- end of First time guide -->
+        
+        <!-- Stuck -->
+        <h2 class="mt-2" id="stuck">Stuck?</h2>
+
+        <p>
+          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+        </p>
+        <!-- end of Stuck -->
   
-  <div class="mt-2 flex">
-    <div>
-      <h3>Try it</h3>
-      <p>
-        Try each of the <a href="">configured run scripts</a> to test what the demo can do. Then try changing the behavior of the demo by using different <a href="">command line options</a> and <a href="">input data</a>.
-      </p>
+      </div>
     </div>
-    <div class="vspace"></div>
-    <div>
-      <h3>Dig deeper</h3>
-      <p>
-        Once you've seen what the demo can do, you can learn how it works by reading its <a href="">documentation</a>, <a href="">research papers</a>, and <a href="">source code</a>. You can also <a href="">change the source code</a> to test out new ideas.
-      </p>
-    </div>
-  </div>
-  <!-- end of First time guide -->
-
-  <!-- Stuck -->
-  <h2 class="mt-2" id="stuck">Stuck?</h2>
-
-  <p>
-    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-  </p>
-  <!-- end of Stuck -->
+  </div> <!-- end of section -->
   
 </div>
-<!-- end of Doc content -->
+<!-- end of doc content -->

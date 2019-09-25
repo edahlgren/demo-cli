@@ -1,25 +1,51 @@
 <!-- Doc content -->
-<div class="doc">
+<div id="doc" class="doc">
+  
+  <div class="section">            <!-- 100% of non-nav -->
+    <div class="middle-width content-ml">
 
-  <!-- Command title and short description -->
-  <h1 class="mb-0.25" id="title">demo run</h1>
+      <!-- Title, description -->
+      
+      <h1 class="mb-0.25" id="title">demo run</h1>
+      <p>Run the demo using a built-in script or your choice of command line options</p>
 
-  <p>Run the demo using a built-in script or your choice of command line options</p>
+      <h2 class="mt-2 mb-0">Basics</h2>
+        
+    </div>
+  </div> <!-- end of section -->
 
-  <h2 class="mt-2">Examples</h2>
+  <div class="section mt-1">
+    <div class="flex content-ml">
+      
+      <div class="left-note pt-1 pr-6">
+        List the built-in scripts
+      </div>
 
-  <pre><code><span class="prompt">$</span> demo run
+      <div class="middle-width">
+        <pre id="example1" class="example"><code><span class="prompt">$</span> demo run
 </code></pre>
 
-  <pre class="output">djibouti      Find the shortest roundtrip through Djibouti (5s)
+        <pre class="output"><code>djibouti      Find the shortest roundtrip through Djibouti (5s)
 qatar         Find the shortest roundtrip through Qatar (5s)
 luxembourg    Find the shortest roundtrip through Luxembourg (5s)
 </code></pre>
+      </div>
 
-  <pre class="mt-2"><code><span class="prompt">$</span> demo run djibouti
+    </div>
+  </div>
+  
+  <div class="section mt-1">
+    <div class="flex content-ml">
+
+      <div class="left-note pt-1 pr-6">
+        Try one of the built-in scripts
+      </div>
+        
+      <div class="middle-width">
+        <pre class="example"><code><span class="prompt">$</span> demo run <span class="highlight">djibouti</span>
 </code></pre>
       
-  <pre class="output"><code>[Command line]
+        <pre class="output"><code>[Command line]
 
 /root/src/acotsp \
     -i /root/data/djibouti/dj38.tsp \
@@ -43,10 +69,23 @@ best so far 6656, iteration: 12700, time 4.97, branching factor 1.00000
  best solution was found at time 0.000592
 </code></pre>
 
-  <pre class="mt-2"><code><span class="prompt">$</span> demo run -i /root/data/djibouti/dj38.tsp --tries 1 --time 10
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="section mt-1">
+    <div class="flex content-ml">
+
+      <div class="left-note pt-1 pr-6">
+        Run with command line options
+      </div>
+        
+      <div class="middle-width">
+          <pre class="example"><code><span class="prompt">$</span> demo run <span class="highlight">-i /root/data/djibouti/dj38.tsp --tries 1 --time 10</span>
 </code></pre>
   
-  <pre class="output"><code>[Command line]
+          <pre class="output"><code>[Command line]
 
 /root/src/acotsp \
     -i /root/data/djibouti/dj38.tsp \
@@ -71,113 +110,400 @@ best so far 6656, iteration: 25600, time 9.97, branching factor 1.00000
  best solution was found at time 0.002275
       
 </code></pre>
+      </div>
+        
+    </div>
+  </div>
   
-  <h2 class="mt-2">Command line options</h2>
+  <div class="section mt-1">
+    <div class="flex content-ml">
 
-  <!--<div class="extended-table mt-2">-->
-  <table class="wrap mt-2 hangright">
-    <tbody>
-      <tr>
-        <td class="option">--as, -u</td>
-        <td class="default"></td>
-        <td>Basic Ant System</td>
-      </tr>
-      <tr>
-        <td class="option">--eas, -v</td>
-        <td class="default"></td>
-        <td>Elitist Ant System</td>
-      </tr>
-      <tr>
-        <td class="option">--mmas, -x</td>
-        <td class="default">&bull;</td>
-        <td>MAX-MIN Ant System</td>
-      </tr>
-      <tr>
-        <td class="option">--ras, -w</td>
-        <td class="default"></td>
-        <td>Rank-based Ant System</td>
-      </tr>
-      <tr>
-        <td class="option">--acs, -z</td>
-        <td class="default"></td>
-        <td>Ant Colony System</td>
-      </tr>
-      <tr>
-        <td class="option">--bwas, -y</td>
-        <td class="default"></td>
-        <td>Best-worst Ant System</td>
-      </tr>
-      <tr class="hspace-1">
-        <td class="option"></td>
-        <td class="default"></td>
-        <td></td>
-      </tr>
-      <tr class="hspace-1">
-        <td class="option"></td>
-        <td class="default"></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="option">--tsplibfile, -i</td>
-        <td class="default"><div class="label-center light-blue">ND</div></td>
-        <td>Path to a <a href="https://wwwproxy.iwr.uni-heidelberg.de/groups/comopt/software/TSPLIB95/tsp95.pdf">TSPLIB</a> formatted file</td>
-      </tr>
-      <tr>
-        <td class="option">--tries, -r</td>
-        <td class="default">10</td>
-        <td>Number of independent trials</td>
-      </tr>
-      <tr>
-        <td class="option">--time, -t</td>
-        <td class="default">10</td>
-        <td>Maximum time for each trial in seconds</td>
-      </tr>
-      <tr>
-        <td class="option">--ants, -m</td>
-        <td class="default">25</td>
-        <td>Number of ants (ant colony size)</td>
-      </tr>
-      <tr>
-        <td class="option">--nnants, -g</td>
-        <td class="default">20</td>
-        <td>Number of ants that can communicate with each other</td>
-      </tr>
-      <tr>
-        <td class="option">--quiet</td>
-        <td class="default">false</td>
-        <td>Reduce logs to a minimum</td>
-      </tr>
-      <tr class="hspace-1">
-        <td class="option"></td>
-        <td class="default"></td>
-        <td></td>
-      </tr>
-      <tr class="hspace-1">
-        <td class="option"></td>
-        <td class="default"></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="small-uppercase align-right">option</td>
-        <td class="small-uppercase default">default</td>
-        <td class="small-uppercase">description</td>
-      </tr>
-    </tbody>
-  </table>    
-  <!--</div>-->
-  
-  <table class="legend underhang">
-    <tr>
-      <td><span class="label light-blue">ND</span></td>
-      <td><span class="pl-0.25 pr-0.25">=</span></td>
-      <td>No default value, you must specify one</td>
-    </tr>
-  </table>
-
-  <pre class="mt-2"><code><span class="prompt">$</span> demo run help --mmas
+      <div class="left-note pt-1 pr-6">
+        Learn about a command line option
+      </div>
+        
+      <div class="middle-width">
+        <pre class="example"><code><span class="prompt">$</span> demo run <span class="highlight">help -i</span>
 </code></pre>
   
-  <pre class="output"><code>Use the MAX-MIN Ant System as the artificial ant colony implementation
+        <pre class="output"><code>Choose a TSPLIB formatted file to use as input to the demo (required)
+
+Included in the demo *:
+
+    Cities of Djibouti    /root/data/djibouti/dj38.tsp
+    Cities of Qatar       /root/data/qatar/qa194.tsp
+    Cities of Luxembourg  /root/data/luxembourg/lu980.tsp
+
+* = From "National Traveling Salesman Problems", University of Waterloo
+</code></pre>
+      </div>
+        
+    </div>
+  </div>
+  
+  <div class="section">            <!-- 100% of non-nav -->
+    <div class="middle-width content-ml">
+
+      <h2 class="mt-3">Command line options</h2>
+
+      <table class="command-line-options wrap mt-2">
+        <tbody>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="option">--as, -u</td>
+            <td class="default"></td>
+            <td> Ant System</td>
+          </tr>
+          <tr>
+            <td class="option">--eas, -v</td>
+            <td class="default "></td>
+            <td>Elitist Ant System</td>
+          </tr>
+          <tr>
+            <td class="option">--mmas, -x</td>
+            <td class="default">&bull;</td>
+            <td>MAX-MIN Ant System</td>
+          </tr>
+          <tr>
+            <td class="option">--ras, -w</td>
+            <td class="default"></td>
+            <td>Rank-based Ant System</td>
+          </tr>
+          <tr>
+            <td class="option">--acs, -z</td>
+            <td class="default"></td>
+            <td>Ant Colony System</td>
+          </tr>
+          <tr>
+            <td class="option">--bwas, -y</td>
+            <td class="default"></td>
+            <td>Best-worst Ant System</td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default"></td>
+            <td></td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="option">--tsplibfile, -i</td>
+            <td class="default"><div class="label-large-center light-blue">R</div></td>
+            <td>Path to a <a href="https://wwwproxy.iwr.uni-heidelberg.de/groups/comopt/software/TSPLIB95/tsp95.pdf">TSPLIB</a> formatted file</td>
+          </tr>
+          <tr>
+            <td class="option">--tries, -r</td>
+            <td class="default">10</td>
+            <td>Number of independent trials</td>
+          </tr>
+          <tr>
+            <td class="option">--time, -t</td>
+            <td class="default">10</td>
+            <td>Maximum time for each trial in seconds</td>
+          </tr>
+          <tr>
+            <td class="option">--ants, -m</td>
+            <td class="default">25</td>
+            <td>Number of ants (ant colony size)</td>
+          </tr>
+          <tr>
+            <td class="option">--nnants, -g</td>
+            <td class="default">20</td>
+            <td>Number of ants that can communicate with each other</td>
+          </tr>
+          <tr>
+            <td class="option">--quiet</td>
+            <td class="default">false</td>
+            <td>Reduce logs to a minimum</td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default"></td>
+            <td></td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="small-uppercase align-right">option</td>
+            <td class="small-uppercase default">default</td>
+            <td class="small-uppercase">description</td>
+          </tr>
+          <tr class="hspace-1">
+          </tr>
+          <tr class="hspace-1">
+          </tr>
+          <tr class="hspace-1">
+          </tr>
+          <tr class="hspace-1">
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="option">--alpha, -a</td>
+            <td class="default adv">1</td>
+            <td>Influence of pheromone trails</td>
+          </tr>
+          <tr>
+            <td class="option">--beta, -b</td>
+            <td class="default adv">2</td>
+            <td>Influence of heuristic information</td>
+          </tr>
+          <tr>
+            <td class="option">--rho, -e</td>
+            <td class="default adv">0.5</td>
+            <td>Pheromone trail evaporation rate</td>
+          </tr>
+          <tr>
+            <td class="option">--q0, -q</td>
+            <td class="default adv">0.0</td>
+            <td>Probability of finding the best solution</td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="option">--elitistants, -c</td>
+            <td class="default adv">0</td>
+            <td>Number of elitist ants (with --eas only)</td>
+          </tr>
+          <tr>
+            <td class="option">--rasranks, -f</td>
+            <td class="default adv">0</td>
+            <td>Number of ranks (with --ras only)</td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="option">--localsearch, -l</td>
+            <td class="default adv">3</td>
+            <td>Configure local search</td>
+          </tr>
+          <tr>
+            <td class="option">--nnls, -k</td>
+            <td class="default adv">20</td>
+            <td>Number of ants in a neighborhood for local search</td>
+          </tr>
+          <tr>
+            <td class="option">--dlb, -d</td>
+            <td class="default adv">true</td>
+            <td>Use don't look bits in local search</td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="option">--optimum, -o</td>
+            <td class="default adv">1</td>
+            <td>Stop if solution is less than or equal to this number</td>
+          </tr>
+          <tr>
+            <td class="option">--seed</td>
+            <td class="default adv">time</td>
+            <td>Seed for the internal random number generator</td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr class="hspace-1">
+            <td class="option"></td>
+            <td class="default adv"></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td class="small-uppercase align-right">option</td>
+            <td class="small-uppercase default adv">default</td>
+            <td class="small-uppercase">description</td>
+          </tr>
+        </tbody>
+      </table>
+  
+      <table class="legend underhang">
+        <tr>
+          <td><div style="height: 1rem; width: 1rem;" class="default-color-legend"></div></td>
+          <td><span class="pl-0.25 pr-0.25">=</span></td>
+          <td>Basic</td>
+        </tr>
+        <tr>
+          <td><div style="height: 1rem; width: 1rem;" class="default-adv-legend"></div></td>
+          <td><span class="pl-0.25 pr-0.25">=</span></td>
+          <td>Advanced</td>
+        </tr>
+        <tr>
+          <td><span class="label-large light-blue">R</span></td>
+          <td><span class="pl-0.25 pr-0.25">=</span></td>
+          <td>This option is required</td>
+        </tr>
+      </table>
+    </div>
+  </div> <!-- end of section -->
+
+  <div class="section">            <!-- 100% of non-nav -->
+    <div class="middle-width content-ml">
+      <h2 class="mt-2">Examples</h2>
+
+      <p class="pb-0">Use the Elitist Ant System to solve Djibouti:</p>        
+      <pre class="example mt-0 pt-0 mb-2"><code><span class="prompt">$</span> demo run <span class="highlight-1">-i /root/data/djibouti/dj38.tsp</span> <span class="highlight">--eas</span>
+</code></pre>
+      
+      <p class="pb-0">Spend 20 seconds solving Qatar:</p>
+      <pre class="example mt-0 pt-0 mb-2"><code>$ demo run <span class="highlight-1">-i /root/data/qatar/qa194.tsp</span> <span class="highlight">--time 20</span>
+</code></pre>            
+        
+      <p class="pb-0">Use 100 ants to solve Djibouti:</p>
+      <pre class="example mt-0 pt-0 mb-2"><code>$ demo run <span class="highlight-1">-i /root/data/djibouti/dj38.tsp</span> <span class="highlight">--ants 100</span>
+</code></pre>
+
+      <p class="pb-0">Use the Basic Ant System and allow each ant to share information with its nearest 40 neighbors to solve Luxembourg:</p>
+      <pre class="example mt-0 pt-0 mb-2"><code>$ demo run <span class="highlight-1">-i /root/data/luxembourg/lu980.tsp</span> <span class="highlight">--as --nnants 40</span>
+</code></pre>
+    </div>
+  </div> <!-- end of section -->
+        
+  <div class="section">            <!-- 100% of non-nav -->
+    <div class="middle-width content-ml">
+      <h2 class="mt-2">Stuck?</h2>
+
+      <div class="flex space-between mb-3">
+      
+        <table class="mt-1 toc wrap-only">
+          <tbody>
+            <tr>
+              <td><span class="label grey-blue">GS</span></td>
+              <td>
+                <a href="">
+                  If you can't execute the demo
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="label grey-blue">GS</span></td>
+              <td>
+                <a href="">
+                  If you don't understand a command line option
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="label red">D</span></td>
+              <td>
+                <a href="">
+                  If the demo isn't functioning properly
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="label red">D</span></td>
+              <td>
+                <a href="">
+                  If you want to run the demo manually
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <table class="mt-1 legend wrap-only">
+          <tbody>
+            <tr>
+              <td><span class="label grey-blue">GS</span></td>
+              <td><span class="pl-0.25 pr-0.25">=</span></td>
+              <td>Getting Started</td>
+            </tr>
+            <tr>
+              <td><span class="label red">D</span></td>
+              <td><span class="pl-0.25 pr-0.25">=</span></td>
+              <td>Debugging</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <hr />
+      
+    </div>
+  </div>
+          
+  
+  <div class="section mt-3">
+    <div class="middle-width content-ml">
+      
+      <table class="wrap-only">
+        <tbody>
+          <tr>
+            <td><span class="label grey-blue pr-0.5">GS</span></td>
+            <td>If you can't execute the demo</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="ml-2 mt-2">
+        <p class="pb-0">Glance over the <a href="">basic</a> examples above. Make sure you're using either a script name with <span class="inline-code">demo run</span>, or command line options, but not both at once. For example, this won't work:</p>
+
+        <pre class="example mt-0 pt-0 pb-0.5"><code><span class="prompt">$</span> demo run <span class="highlight-2">djibouti -i /root/data/djibouti/dj38.tsp</span>
+</code></pre>
+        
+        <pre class="output mb-2"><code>Use either a script name OR command line options
+</code></pre>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div class="section mt-2">
+    <div class="middle-width content-ml">
+      
+      <table class="wrap-only">
+        <tbody>
+          <tr>
+            <td><span class="label grey-blue pr-0.5">GS</span></td>
+            <td>If you don't understand a command line option</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="ml-2 mt-2">
+        <p class="pb-0">Use <span class="inline-code">demo run help</span>, for example for the <span class="inline-code">--mmas</span> option:</p>
+        
+        <pre class="example mt-0 pt-0 pb-0.5"><code><span class="prompt">$</span> demo run <span class="highlight">help --mmas</span>
+</code></pre>
+        <pre class="output mb-2"><code>Use the MAX-MIN Ant System as the artificial ant colony implementation
 
 From Thomas Stützle and Holger H. Hoos, "MAX-MIN Ant System", Future Generation
 Computer Systems 2000
@@ -190,142 +516,59 @@ compared to more fine-tuned algorithms, was rather poor for large instances of t
 benchmark problems like the Traveling Salesman Problem. To show that Ant Colony Optimization
 ...
 </code></pre>
+      </div>
 
-  <!--
-  <div class="subtitle">Advanced options</div>
-  <table>
-    <tbody>
-      <tr>
-        <td class="inline-code nowrap">--tours, -s</td>
-        <td class="default">0</td>
-        <td>Number of steps in each trial</td>
-      </tr>
-      <tr>
-        <td class="inline-code nowrap">--seed</td>
-        <td class="default">current time</td>
-        <td>Seed for the internal random number generator</td>
-      </tr>
-      <tr>
-        <td class="inline-code nowrap">--optimum, -o</td>
-        <td class="default">1</td>
-        <td>Stop if solution is better or equal to this number (lower is better)</td>
-      </tr>
-      <tr class="hspace-1"></tr>
-      <tr class="hspace-1"></tr>
-      <tr>
-        <td class="inline-code nowrap">--alpha, -a</td>
-        <td class="default">1</td>
-        <td>Influence of pheromone trails</td>
-      </tr>
-      <tr>
-        <td class="inline-code nowrap">--beta, -b</td>
-        <td class="default">2</td>
-        <td>Influence of heuristic information</td>
-      </tr>
-      <tr>
-        <td class="inline-code nowrap">--rho, -e</td>
-        <td class="default">0.5</td>
-        <td>Pheromone trail evaporation rate</td>
-      </tr>
-      <tr>
-        <td class="inline-code nowrap">--q0, -q</td>
-        <td class="default">0.0</td>
-        <td>Probability of finding the best solution</td>
-      </tr>
-      <tr class="hspace-1"></tr>
-      <tr>
-        <td class="inline-code nowrap">--elitistants, -c</td>
-        <td class="default">0</td>
-        <td>Number of elitist ants (with --eas only)</td>
-      </tr>
-      <tr>
-        <td class="inline-code nowrap">--rasranks, -f</td>
-        <td class="default">0</td>
-        <td>Number of ranks (with --ras only)</td>
-      </tr>
-      <tr class="hspace-1"></tr>
-      <tr>
-        <td class="inline-code nowrap">--localsearch, -l</td>
-        <td class="default">3</td>
-        <td>Configure local search</td>
-      </tr>
-      <tr>
-        <td class="inline-code nowrap">--nnls, -k</td>
-        <td class="default">20</td>
-        <td>Number of ants in a neighborhood for local search</td>
-      </tr>
-      <tr>
-        <td class="inline-code nowrap">--dlb, -d</td>
-        <td class="default"><div class="align-left label red pr-0.5">D</div></td>
-        <td>Use don't look bits in local search</td>
-      </tr>
-      <tr class="hspace-1"></tr>
-    </tbody>
-  </table>
-  -->
+    </div>
+  </div> <!-- end of section -->
   
-  <h2 class="mt-3">Included test data</h2>
+  <div class="section mt-2">
+    <div class="middle-width content-ml">
+      
+      <table class="wrap-only">
+        <tbody>
+          <tr>
+            <td><span class="label red pr-0.5">D</span></td>
+            <td>If the demo isn't functioning properly</td>
+          </tr>
+        </tbody>
+      </table>
 
-  <table>
-    <tbody>
-      <tr>
-        <td>
-          <span class="label light-blue">&bull;</span>
-          <span class="pr-0.5 label red">&bull;</span>
-        </td>
-        <td class="inline-code">/root/data/djibouti/dj38.tsp</td>
-        <td>Contains points representing cities in Djibouti (Africa)</td>
-      </tr>
-      <tr>
-        <td>
-          <span class="label light-blue">&bull;</span>
-          <span class="pr-0.5 label red">&bull;</span>
-        </td>
-        <td class="inline-code">/root/data/qatar/qa194.tsp</td>
-        <td>Contains points representing cities in Qatar (Middle East)</td>
-      </tr>
-      <tr>
-        <td>
-          <span class="label light-blue">&bull;</span>
-          <span class="pr-0.5 label red">&bull;</span>
-        </td>
-        <td class="inline-code">/root/data/luxembourg/lu980.tsp</td>
-        <td>Contains points representing cities in Luxembourg (Europe)</td>
-      </tr>
-    </tbody>
-  </table>
+      <div class="ml-2 mt-2">
+        <p>Try adding log statements to the <a href="">main loop</a>. If you're unsure how to go about changing the demo, read <a href="">this guide</a>.
+      </div>
+      
+    </div>
+  </div> <!-- end of section -->
   
-  <table class="legend underhang">
-    <tr>
-      <td><span class="label light-blue">&bull;</span></td>
-      <td>=</td>
-      <td>From <a href="http://www.math.uwaterloo.ca/tsp/world/countries.html">National Traveling Salesman Problems</a> provided by the University of Waterloo. This source contains data on 25 countries, with as few cities as 29 all the way to 71,009</td>
-    </tr>
-    <tr>
-      <td><span class="label red">&bull;</span></td>
-      <td>=</td>
-      <td>Formatted as a <a href="https://wwwproxy.iwr.uni-heidelberg.de/groups/comopt/software/TSPLIB95/tsp95.pdf">TSPLIB</a> file</td>
-    </tr>
-  </table>
-  
-  <h2 class="mt-2">Stuck?</h2>
+  <div class="section mt-2">
+    <div class="middle-width content-ml">
+      
+      <table class="wrap-only">
+        <tbody>
+          <tr>
+            <td><span class="label red pr-0.5">D</span></td>
+            <td>If you want to run the demo manually</td>
+          </tr>
+        </tbody>
+      </table>
 
-  <p>Conveniently, you can print whatever <span class="em">would</span> be executed by <span class="inline-code">demo run</span> by adding <span class="inline-code">--dry-run</span>:</p>
+      <div class="ml-2 mt-2">
+        <p class="pb-0">Copy and paste the lines under <span class="inline-code">[Command line]</span> into your shell and execute them. For example:</p>
 
-  <pre><code>$ demo run djibouti --dry-run
+        <pre class="example mt-0 pt-0 pb-0.5"><code><span class="prompt">$</span> demo run <span class="highlight">djibouti</span>
 </code></pre>
+        <pre class="output mb-2"><code>[Command line]
 
-  <pre class="output"><code>/root/src/acotsp -i /root/data/djibouti/dj38.tsp --mmas --tries 1 --time 5
+/root/src/acotsp \
+    -i /root/data/djibouti/dj38.tsp \
+    --tries 1 \
+    --time 5
+
+...
 </code></pre>
-
-  <pre id="e1"><code>$ demo run -i /root/data/djibouti/dj38.tsp --eas
-</code></pre>
-
-  <pre class="output"><code>/root/src/acotsp -i /root/data/djibouti/dj38.tsp --eas
-</code></pre>
-
-  <p>
-    This way you can wrap the command line in a debugger, profiler, tracer, or any other tool you prefer. If the demo isn't producing the output you expect, try adding log statements to the <a href="">main loop</a>. If you're unsure how to go about changing the demo, read the <a href="">guide</a>.
-  </p>
-  
+      </div>
+      
+    </div>
+  </div> <!-- end of section -->
+        
 </div>
